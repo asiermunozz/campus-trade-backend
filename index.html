@@ -9,132 +9,524 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
-    <nav class="bg-white border-b py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+    <nav class="bg-white border-b py-4 px-6 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-2 cursor-pointer" onclick="cambiarPantalla('pantalla-tienda')">
             <i class="fa-solid fa-store text-blue-600 text-2xl"></i>
             <span class="text-xl font-bold text-gray-900">CampusTrade</span>
         </div>
-        
-        <div class="hidden md:flex flex-1 max-w-2xl mx-8 relative">
-            <i class="fa-solid fa-search absolute left-4 top-3 text-gray-400"></i>
-            <input type="text" placeholder="Buscar productos, libros, vivienda..." class="w-full bg-gray-100 rounded-full py-2 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500 transition">
-        </div>
-
-        <div class="flex items-center gap-6 text-gray-600">
-            <button class="hover:text-red-500 transition"><i class="fa-regular fa-heart text-xl"></i></button>
-            <button onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition"><i class="fa-regular fa-user text-xl"></i></button>
+        <div class="flex items-center gap-4 text-gray-600">
+            <button onclick="cambiarPantalla('pantalla-publicar')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+                + Vender
+            </button>
+            <button id="btn-login" onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition ml-2">
+                Entrar <i class="fa-solid fa-right-to-bracket ml-1"></i>
+            </button>
+            <div id="contenedor-perfil" class="hidden items-center gap-3 ml-2">
+                <button onclick="cambiarPantalla('pantalla-perfil')" class="bg-gray-100 hover:bg-gray-200 pl-2 pr-4 py-1.5 rounded-full transition flex items-center gap-2">
+                    <div id="nav-foto-perfil" class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+                        <i class="fa-solid fa-user text-blue-600 text-sm"></i>
+                    </div>
+                    <span id="texto-nombre" class="font-bold"></span>
+                </button>
+                <button onclick="cerrarSesion()" class="text-gray-400 hover:text-red-600 transition" title="Cerrar sesión">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-xl"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
     <div id="pantalla-tienda" class="pantalla block max-w-7xl mx-auto px-6 py-8">
-        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 text-sm">
-            <div>
-                <label class="block text-gray-500 mb-1">Categoría</label>
-                <select class="w-full bg-gray-100 rounded-md p-2 outline-none cursor-pointer">
-                    <option>Todas las categorías</option>
-                    <option>Electrónica</option>
-                    <option>Libros</option>
-                </select>
+        <h2 class="text-2xl font-bold mb-4">Descubre anuncios</h2>
+        <div class="mb-8 flex flex-col md:flex-row gap-4 bg-white p-4 rounded-2xl border shadow-sm">
+            <div class="flex-1 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                <input id="filtro-texto" onkeyup="aplicarFiltrosTienda()" type="text" placeholder="Buscar por nombre (ej: Calculadora...)" class="w-full bg-gray-50 border rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500 transition">
             </div>
-            <div>
-                <label class="block text-gray-500 mb-1">Precio mín.</label>
-                <input type="number" placeholder="0" class="w-full bg-gray-100 rounded-md p-2 outline-none">
+            <select id="filtro-categoria" onchange="aplicarFiltrosTienda()" class="bg-gray-50 border rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-blue-500 transition md:w-72 font-semibold text-gray-700">
+                <option value="Todas">Todas las categorías</option>
+                <option value="Libros y Apuntes">Libros y Apuntes</option>
+                <option value="Informática y Electrónica">Informática y Electrónica</option>
+                <option value="Muebles de Estudio">Muebles de Estudio</option>
+                <option value="Material de Facultad">Material de Facultad</option>
+                <option value="Hogar y Cocina">Hogar y Cocina</option>
+                <option value="Moda y Graduaciones">Moda y Graduaciones</option>
+                <option value="Deporte y Ocio">Deporte y Ocio</option>
+                <option value="Transporte y Movilidad">Transporte y Movilidad</option>
+                <option value="Servicios (Clases y Mudanzas)">Servicios (Clases y Mudanzas)</option>
+                <option value="Regalos y Varios">Regalos y Varios</option>
+                <option value="Otros">Otros</option>
+            </select>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="grid-productos-tienda"></div>
+    </div>
+
+    <div id="pantalla-detalle" class="pantalla hidden max-w-5xl mx-auto px-6 py-8">
+        <button onclick="cambiarPantalla('pantalla-tienda')" class="mb-6 text-gray-500 hover:text-blue-600 font-bold flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
+        </button>
+        <div class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-1/2">
+                <div class="h-64 md:h-96 bg-gray-100 rounded-xl overflow-hidden mb-4 border flex items-center justify-center relative" id="detalle-foto-principal"></div>
+                <div class="flex gap-2 overflow-x-auto pb-2" id="detalle-miniaturas"></div>
             </div>
-            <div>
-                <label class="block text-gray-500 mb-1">Precio máx.</label>
-                <input type="number" placeholder="∞" class="w-full bg-gray-100 rounded-md p-2 outline-none">
-            </div>
-            <div>
-                <label class="block text-gray-500 mb-1">Ordenar por</label>
-                <select class="w-full bg-gray-100 rounded-md p-2 outline-none cursor-pointer">
-                    <option>Más reciente</option>
-                    <option>Precio: Menor a Mayor</option>
-                </select>
+            <div class="w-full md:w-1/2 flex flex-col">
+                <span class="text-sm font-bold text-blue-600 uppercase tracking-wide bg-blue-50 px-3 py-1 rounded-full w-max mb-2" id="detalle-categoria"></span>
+                <h2 class="text-3xl font-bold mb-4 text-gray-800" id="detalle-titulo"></h2>
+                <p class="text-4xl font-extrabold text-gray-900 mb-6" id="detalle-precio"></p>
+                <h3 class="font-bold text-lg mb-2 border-b pb-2">Descripción</h3>
+                <p class="text-gray-600 mb-6 whitespace-pre-wrap flex-1" id="detalle-desc"></p>
+                
+                <div class="bg-gray-50 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4" id="detalle-info-vendedor">
+                    </div>
+
+                <div id="detalle-zona-boton" class="mt-auto pt-6 border-t"></div>
             </div>
         </div>
+    </div>
 
-        <p class="text-gray-500 mb-4">Mostrando resultados...</p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="grid-productos">
-            <div class="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition cursor-pointer" onclick="cambiarPantalla('pantalla-pago')">
-                <div class="relative h-48 bg-gray-200">
-                    <img src="https://picsum.photos/seed/macbook/400/300" class="w-full h-full object-cover">
-                    <span class="absolute top-2 left-2 bg-white text-xs font-semibold px-2 py-1 rounded shadow text-gray-700">Como nuevo</span>
-                    <button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow hover:text-red-500 transition"><i class="fa-regular fa-heart"></i></button>
+    <div id="pantalla-perfil" class="pantalla hidden max-w-7xl mx-auto px-6 py-8">
+        <div class="bg-white p-6 rounded-2xl border shadow-sm mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div id="perfil-foto-grande" class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden border-2 border-white shadow-md">
+                    <i class="fa-solid fa-user"></i>
                 </div>
-                <div class="p-4">
-                    <p class="text-xs text-blue-600 font-semibold mb-1">Electrónica</p>
-                    <h3 class="font-bold text-gray-800 leading-tight mb-2 truncate">MacBook Pro 2021 - 14" M1</h3>
-                    <div class="flex justify-between items-end mt-4">
-                        <span class="font-extrabold text-xl text-gray-900">€1450.00</span>
-                        <span class="text-xs text-gray-400">Campus Norte</span>
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2" id="perfil-titulo">Mi Perfil</h2>
+                    <p class="text-gray-500">Tu espacio personal en CampusTrade</p>
+                </div>
+            </div>
+            <button onclick="cerrarSesion()" class="border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg font-bold transition">Cerrar Sesión</button>
+        </div>
+
+        <div class="flex gap-6 border-b mb-8 overflow-x-auto">
+            <button onclick="cambiarPestanaPerfil('venta')" id="tab-venta" class="pb-3 border-b-2 font-bold transition border-blue-600 text-blue-600">En Venta</button>
+            <button onclick="cambiarPestanaPerfil('favoritos')" id="tab-favoritos" class="pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent">Favoritos</button>
+            <button onclick="cambiarPestanaPerfil('comprados')" id="tab-comprados" class="pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent">Comprados</button>
+            <button onclick="cambiarPestanaPerfil('vendidos')" id="tab-vendidos" class="pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent">Vendidos</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="grid-perfil-contenido"></div>
+    </div>
+
+    <div id="pantalla-publicar" class="pantalla hidden max-w-2xl mx-auto px-6 py-10">
+        <div class="bg-white p-8 rounded-2xl shadow-md border">
+            <h2 class="text-2xl font-bold mb-6">¿Qué quieres vender?</h2>
+            <div class="space-y-4">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition cursor-pointer relative">
+                    <i class="fa-solid fa-images text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-600 font-bold">Añadir Fotos (Opcional)</p>
+                    <input id="nuevo-imagenes" type="file" accept="image/*" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div id="preview-imagenes" class="mt-4 flex gap-2 justify-center flex-wrap"></div>
+                </div>
+                <input id="nuevo-titulo" type="text" placeholder="Título (ej: Apuntes de Física)" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea id="nuevo-desc" placeholder="Descripción del producto..." class="w-full p-3 bg-gray-50 border rounded-lg h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="nuevo-precio" type="number" placeholder="Precio (€)" class="p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="nuevo-cat" class="p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-gray-700">
+                        <option value="Libros y Apuntes">Libros y Apuntes</option>
+                        <option value="Informática y Electrónica">Informática y Electrónica</option>
+                        <option value="Muebles de Estudio">Muebles de Estudio</option>
+                        <option value="Material de Facultad">Material de Facultad</option>
+                        <option value="Hogar y Cocina">Hogar y Cocina</option>
+                        <option value="Moda y Graduaciones">Moda y Graduaciones</option>
+                        <option value="Deporte y Ocio">Deporte y Ocio</option>
+                        <option value="Transporte y Movilidad">Transporte y Movilidad</option>
+                        <option value="Servicios (Clases y Mudanzas)">Servicios</option>
+                        <option value="Regalos y Varios">Regalos y Varios</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <button onclick="subirAnuncioReal()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-lg">Publicar Anuncio</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-editar" class="pantalla hidden max-w-2xl mx-auto px-6 py-10">
+        <div class="bg-white p-8 rounded-2xl shadow-md border relative">
+            <button onclick="cambiarPantalla('pantalla-perfil')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-blue-600">Editar Anuncio</h2>
+            <input type="hidden" id="edit-id">
+            <div class="space-y-4">
+                <label class="block text-sm font-bold text-gray-700">Título</label>
+                <input id="edit-titulo" type="text" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <label class="block text-sm font-bold text-gray-700 mt-2">Descripción</label>
+                <textarea id="edit-desc" class="w-full p-3 bg-gray-50 border rounded-lg h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Precio (€)</label>
+                        <input id="edit-precio" type="number" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700">Categoría</label>
+                        <select id="edit-cat" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Libros y Apuntes">Libros y Apuntes</option>
+                            <option value="Informática y Electrónica">Informática y Electrónica</option>
+                            <option value="Muebles de Estudio">Muebles de Estudio</option>
+                            <option value="Material de Facultad">Material de Facultad</option>
+                            <option value="Hogar y Cocina">Hogar y Cocina</option>
+                            <option value="Moda y Graduaciones">Moda y Graduaciones</option>
+                            <option value="Deporte y Ocio">Deporte y Ocio</option>
+                            <option value="Transporte y Movilidad">Transporte y Movilidad</option>
+                            <option value="Servicios (Clases y Mudanzas)">Servicios</option>
+                            <option value="Regalos y Varios">Regalos y Varios</option>
+                            <option value="Otros">Otros</option>
+                        </select>
                     </div>
                 </div>
+                <button onclick="guardarEdicionAnuncio()" class="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">Guardar Cambios</button>
             </div>
-
-            <div class="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition cursor-pointer" onclick="cambiarPantalla('pantalla-pago')">
-                <div class="relative h-48 bg-gray-200">
-                    <img src="https://picsum.photos/seed/libros/400/300" class="w-full h-full object-cover">
-                    <span class="absolute top-2 left-2 bg-white text-xs font-semibold px-2 py-1 rounded shadow text-gray-700">Buen estado</span>
-                    <button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow hover:text-red-500 transition"><i class="fa-regular fa-heart"></i></button>
-                </div>
-                <div class="p-4">
-                    <p class="text-xs text-blue-600 font-semibold mb-1">Libros</p>
-                    <h3 class="font-bold text-gray-800 leading-tight mb-2 truncate">Pack de Libros Ingeniería</h3>
-                    <div class="flex justify-between items-end mt-4">
-                        <span class="font-extrabold text-xl text-gray-900">€180.00</span>
-                        <span class="text-xs text-gray-400">Biblio Central</span>
-                    </div>
-                </div>
-            </div>
-            
-            </div>
+        </div>
     </div>
 
     <div id="pantalla-login" class="pantalla hidden flex items-center justify-center min-h-[80vh]">
         <div class="bg-white p-8 rounded-xl shadow-md border w-full max-w-md">
             <h2 class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
-            <input type="email" placeholder="Correo universitario (@campus.edu)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
-            <input type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 mb-6 outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="cambiarPantalla('pantalla-tienda')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Entrar</button>
-            <p class="text-center text-sm text-gray-500 mt-4 cursor-pointer hover:underline">¿No tienes cuenta? Regístrate</p>
+            <input id="email-login" type="email" placeholder="Correo (@campus.edu)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="relative mb-6">
+                <input id="pass-login" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="mostrarOcultarPass('pass-login', 'icono-ojo-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-login" class="fa-regular fa-eye"></i></button>
+            </div>
+            <button onclick="intentarLogin()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Entrar</button>
+            <p class="text-center text-sm text-gray-500 mt-6">¿No tienes cuenta? <span onclick="cambiarPantalla('pantalla-registro')" class="text-blue-600 font-bold cursor-pointer hover:underline">Regístrate aquí</span></p>
         </div>
     </div>
 
-    <div id="pantalla-pago" class="pantalla hidden max-w-3xl mx-auto px-6 py-12">
-        <h2 class="text-3xl font-bold mb-6">Resumen de Compra</h2>
-        <div class="bg-white p-6 rounded-xl border shadow-sm flex gap-6 items-center mb-6">
-            <div class="w-32 h-32 bg-gray-200 rounded-lg overflow-hidden shrink-0">
-                <img src="https://picsum.photos/seed/macbook/400/300" class="w-full h-full object-cover">
+    <div id="pantalla-registro" class="pantalla hidden flex items-center justify-center min-h-[80vh]">
+        <div class="bg-white p-8 rounded-xl shadow-md border w-full max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-6">Crear una cuenta</h2>
+            <div class="flex justify-center mb-6">
+                <div class="relative">
+                    <div id="preview-perfil-reg" class="w-20 h-20 bg-gray-100 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden cursor-pointer"><i class="fa-solid fa-camera text-gray-400 text-xl"></i></div>
+                    <input id="reg-foto" type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                </div>
             </div>
-            <div>
-                <h3 class="text-2xl font-bold text-gray-800">MacBook Pro 2021 - 14" M1</h3>
-                <p class="text-gray-500 mt-2">Vendido por: Estudiante123</p>
-                <p class="text-2xl font-extrabold text-gray-900 mt-4">€1450.00</p>
+            <input id="reg-nombre" type="text" placeholder="Tu Nombre" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="reg-email" type="email" placeholder="Correo (@campus.edu)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="relative mb-6">
+                <input id="reg-pass" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="mostrarOcultarPass('reg-pass', 'icono-ojo-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-reg" class="fa-regular fa-eye"></i></button>
             </div>
+            <button onclick="intentarRegistro()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">Registrarse</button>
+            <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="cambiarPantalla('pantalla-login')" class="text-blue-600 font-bold cursor-pointer hover:underline">Inicia sesión</span></p>
         </div>
-        <button onclick="simularCompra()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl text-lg hover:bg-green-700 transition">Confirmar y Pagar</button>
     </div>
 
     <script>
-        // Función para cambiar entre las diferentes "páginas" simuladas
-        function cambiarPantalla(idPantallaDestino) {
-            // Ocultamos todas las pantallas
-            const pantallas = document.querySelectorAll('.pantalla');
-            pantallas.forEach(p => p.classList.add('hidden'));
+        const API_BASE = "http://127.0.0.1:8000/api";
+        let usuarioActual = null; 
+        let anunciosGlobales = []; 
+        let misFavoritos = []; 
+        let pestanaPerfilActual = 'venta';
 
-            // Mostramos solo la que nos interesa
-            document.getElementById(idPantallaDestino).classList.remove('hidden');
-            window.scrollTo(0, 0); // Sube arriba del todo al cambiar
+        window.onload = cargarDatosCentrales;
+
+        async function cargarDatosCentrales() {
+            try {
+                const resAnuncios = await fetch(`${API_BASE}/anuncios`);
+                anunciosGlobales = await resAnuncios.json();
+                
+                if (usuarioActual) {
+                    const resFavs = await fetch(`${API_BASE}/favoritos/${usuarioActual.id_usuario}`);
+                    misFavoritos = await resFavs.json();
+                } else { misFavoritos = []; }
+
+                aplicarFiltrosTienda();
+                if(!document.getElementById('pantalla-perfil').classList.contains('hidden')) renderizarPestanaPerfil();
+            } catch(e) { document.getElementById('grid-productos-tienda').innerHTML = '<p class="text-red-500 p-6 bg-red-50 rounded-xl font-bold">Servidor Python apagado o desconectado.</p>'; }
         }
 
-        // Simulación de compra
-        function simularCompra() {
-            alert("Procesando pago seguro...");
-            alert("¡Compra realizada con éxito! El vendedor ha sido notificado.");
+        function cambiarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            window.scrollTo(0, 0);
+            if(id === 'pantalla-tienda' || id === 'pantalla-perfil') cargarDatosCentrales();
+        }
+
+        function cambiarPestanaPerfil(pestana) {
+            pestanaPerfilActual = pestana;
+            ['venta', 'favoritos', 'comprados', 'vendidos'].forEach(t => {
+                document.getElementById(`tab-${t}`).className = "pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent";
+            });
+            document.getElementById(`tab-${pestana}`).className = "pb-3 border-b-2 font-bold transition border-blue-600 text-blue-600";
+            renderizarPestanaPerfil();
+        }
+
+        function renderizarPestanaPerfil() {
+            const grid = document.getElementById('grid-perfil-contenido');
+            grid.innerHTML = '';
+            let anunciosMostrados = 0;
+
+            anunciosGlobales.forEach(anuncio => {
+                let mostrar = false;
+                let botonesCard = "";
+
+                if (pestanaPerfilActual === 'venta') {
+                    if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado !== 'vendido') {
+                        mostrar = true;
+                        botonesCard = `
+                            <div class="flex gap-2 w-full mt-2">
+                                <button onclick="event.stopPropagation(); abrirEditor(${anuncio.id_anuncio})" class="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-pen"></i> Editar</button>
+                                <button onclick="event.stopPropagation(); borrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-trash"></i> Borrar</button>
+                            </div>
+                        `;
+                    }
+                } else if (pestanaPerfilActual === 'favoritos') {
+                    if (misFavoritos.includes(anuncio.id_anuncio) && anuncio.estado !== 'vendido') {
+                        mostrar = true;
+                        botonesCard = `<button onclick="event.stopPropagation(); comprarArticulo(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm mt-2">Comprar</button>`;
+                    }
+                } else if (pestanaPerfilActual === 'comprados') {
+                    if (anuncio.id_comprador === usuarioActual.id_usuario) {
+                        mostrar = true;
+                        botonesCard = `<span class="text-sm text-green-600 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-check-circle"></i> Tuyo</span>`;
+                    }
+                } else if (pestanaPerfilActual === 'vendidos') {
+                    if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado === 'vendido') {
+                        mostrar = true;
+                        botonesCard = `<span class="text-sm text-gray-500 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-handshake"></i> Entregado</span>`;
+                    }
+                }
+
+                if (mostrar) {
+                    anunciosMostrados++;
+                    grid.innerHTML += generarTarjetaHTML(anuncio, botonesCard, true); 
+                }
+            });
+
+            if (anunciosMostrados === 0) grid.innerHTML = `<p class="text-gray-500 col-span-full py-10">No hay artículos en esta sección.</p>`;
+        }
+
+        function aplicarFiltrosTienda() {
+            const txt = document.getElementById('filtro-texto').value.toLowerCase();
+            const cat = document.getElementById('filtro-categoria').value;
+            const grid = document.getElementById('grid-productos-tienda');
+            grid.innerHTML = ''; 
+            let count = 0;
+
+            anunciosGlobales.forEach(anuncio => {
+                if(anuncio.estado === 'vendido') return;
+                if ((anuncio.titulo.toLowerCase().includes(txt) || anuncio.descripcion.toLowerCase().includes(txt)) &&
+                    (cat === "Todas" || anuncio.categoria === cat)) {
+                    count++;
+                    
+                    const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario);
+                    const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
+                    
+                    let btn = "";
+                    if (esMio) {
+                        btn = `<span class="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded">Es tuyo</span>`;
+                    } else if (esAdmin) {
+                        // NUEVO: Botón especial para el Admin en la tienda
+                        btn = `<button onclick="event.stopPropagation(); verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-200 transition shadow-sm border border-red-200"><i class="fa-solid fa-shield-halved"></i> Gestionar</button>`;
+                    } else {
+                        btn = `<button onclick="event.stopPropagation(); comprarArticulo(${anuncio.id_anuncio})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-sm">Comprar</button>`;
+                    }
+
+                    grid.innerHTML += generarTarjetaHTML(anuncio, btn, false);
+                }
+            });
+
+            if (count === 0) grid.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-gray-500 font-bold text-xl">Ningún anuncio coincide con tu búsqueda.</p></div>`;
+        }
+
+        function generarTarjetaHTML(anuncio, botonAccion, esPerfil) {
+            let fondoHtml = anuncio.imagenes && anuncio.imagenes.length > 0 ? `<img src="${anuncio.imagenes[0]}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-camera text-4xl text-blue-200"></i>`;
+            let badgeFotosExtra = (anuncio.imagenes && anuncio.imagenes.length > 1) ? `<span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full"><i class="fa-solid fa-images mr-1"></i>+${anuncio.imagenes.length - 1}</span>` : "";
+            
+            let corazonHtml = "";
+            const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
+            // Ocultamos el corazón si es admin (los admin moderan, no compran)
+            if (!esPerfil && usuarioActual && anuncio.id_usuario !== usuarioActual.id_usuario && anuncio.estado !== 'vendido' && !esAdmin) {
+                const esFav = misFavoritos.includes(anuncio.id_anuncio);
+                corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
+            }
+
+            let capaVendido = anuncio.estado === 'vendido' ? `<div class="absolute inset-0 bg-white/60 flex items-center justify-center z-20 backdrop-blur-[1px]"><span class="bg-black text-white font-black px-4 py-2 rounded-lg text-xl tracking-widest transform -rotate-12 border-2 border-white">VENDIDO</span></div>` : "";
+
+            let footerHtml = esPerfil 
+                ? `<span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span> ${botonAccion}`
+                : `<div class="mt-auto flex justify-between items-center pt-3 border-t"><span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span>${botonAccion}</div>`;
+
+            return `
+                <div onclick="verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-white rounded-xl border overflow-hidden hover:shadow-xl transition flex flex-col cursor-pointer group relative">
+                    ${capaVendido}
+                    <div class="relative h-48 bg-blue-50 flex items-center justify-center border-b">
+                        ${fondoHtml}
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition"></div>
+                        <span class="absolute top-2 left-2 bg-white text-xs font-bold px-2 py-1 rounded shadow text-gray-700 uppercase tracking-wider">${anuncio.categoria}</span>
+                        ${corazonHtml} ${badgeFotosExtra}
+                    </div>
+                    <div class="p-4 flex flex-col flex-1">
+                        <h3 class="font-bold text-gray-800 text-lg mb-1 truncate group-hover:text-blue-600 transition">${anuncio.titulo}</h3>
+                        <p class="text-sm text-gray-500 mb-4 h-10 overflow-hidden line-clamp-2">${anuncio.descripcion}</p>
+                        ${!esPerfil ? footerHtml : `<div class="mt-auto border-t pt-3 flex flex-col">${footerHtml}</div>`}
+                    </div>
+                </div>
+            `;
+        }
+
+        function verDetalleAnuncio(idAnuncio) {
+            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
+            if(!anuncio) return;
+            
+            document.getElementById('detalle-categoria').innerText = anuncio.categoria;
+            document.getElementById('detalle-titulo').innerText = anuncio.titulo;
+            document.getElementById('detalle-precio').innerText = `€${anuncio.precio.toFixed(2)}`;
+            document.getElementById('detalle-desc').innerText = anuncio.descripcion;
+
+            const avatarHtml = anuncio.vendedor_foto ? `<img src="${anuncio.vendedor_foto}" class="w-12 h-12 rounded-full object-cover shadow-sm">` : `<div class="w-12 h-12 bg-blue-200 text-blue-600 rounded-full flex items-center justify-center text-lg"><i class="fa-solid fa-user"></i></div>`;
+            
+            document.getElementById('detalle-info-vendedor').innerHTML = `
+                <div class="flex items-center gap-3">
+                    ${avatarHtml}
+                    <div>
+                        <p class="font-bold text-gray-800">${anuncio.vendedor_nombre}</p>
+                        <p class="text-xs text-gray-500 font-bold uppercase"><i class="fa-solid fa-graduation-cap"></i> Vendedor verificado</p>
+                    </div>
+                </div>
+                <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 border border-blue-100">
+                    <i class="fa-solid fa-envelope"></i> ${anuncio.vendedor_email}
+                </div>
+            `;
+
+            const divFoto = document.getElementById('detalle-foto-principal');
+            const divMinis = document.getElementById('detalle-miniaturas');
+            divMinis.innerHTML = '';
+
+            if (anuncio.imagenes && anuncio.imagenes.length > 0) {
+                divFoto.innerHTML = `<img src="${anuncio.imagenes[0]}" class="w-full h-full object-contain">`;
+                if (anuncio.imagenes.length > 1) {
+                    anuncio.imagenes.forEach(img => { divMinis.innerHTML += `<img src="${img}" onclick="document.getElementById('detalle-foto-principal').querySelector('img').src='${img}'" class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600 transition shrink-0 shadow-sm">`; });
+                }
+            } else { divFoto.innerHTML = `<i class="fa-solid fa-image text-6xl text-gray-300"></i>`; }
+
+            const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario);
+            const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
+            
+            const zonaBoton = document.getElementById('detalle-zona-boton');
+
+            if (anuncio.estado === 'vendido') {
+                zonaBoton.innerHTML = `<div class="bg-gray-100 text-gray-500 font-bold p-4 rounded-xl text-center"><i class="fa-solid fa-lock"></i> Vendido</div>`;
+                // Si es admin, dejamos borrar los vendidos también
+                if (esAdmin) {
+                     zonaBoton.innerHTML += `
+                     <div class="mt-4 pt-4 border-t border-red-100">
+                        <p class="text-red-500 text-sm font-bold mb-2 text-center"><i class="fa-solid fa-shield-halved"></i> Modo Administrador</p>
+                        <button onclick="borrarAnuncio(${anuncio.id_anuncio})" class="w-full bg-red-50 border-2 border-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Eliminar Registro</button>
+                     </div>`;
+                }
+            } else if (esMio || esAdmin) {
+                let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Estás modificando este anuncio como Administrador</p>` : "";
+                zonaBoton.innerHTML = `
+                    ${badgeAdmin}
+                    <div class="flex gap-4">
+                        <button onclick="abrirEditor(${anuncio.id_anuncio})" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition"><i class="fa-solid fa-pen"></i> Editar</button>
+                        <button onclick="borrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 border-2 border-red-100 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Borrar</button>
+                    </div>
+                `;
+            } else {
+                zonaBoton.innerHTML = `<button onclick="comprarArticulo(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
+            }
+            cambiarPantalla('pantalla-detalle');
+        }
+
+        function abrirEditor(idAnuncio) {
+            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
+            if(!anuncio) return;
+            document.getElementById('edit-id').value = anuncio.id_anuncio;
+            document.getElementById('edit-titulo').value = anuncio.titulo;
+            document.getElementById('edit-desc').value = anuncio.descripcion;
+            document.getElementById('edit-precio').value = anuncio.precio;
+            document.getElementById('edit-cat').value = anuncio.categoria;
+            cambiarPantalla('pantalla-editar');
+        }
+
+        async function guardarEdicionAnuncio() {
+            const idAnuncio = document.getElementById('edit-id').value;
+            const datos = {
+                id_usuario: usuarioActual.id_usuario,
+                titulo: document.getElementById('edit-titulo').value,
+                descripcion: document.getElementById('edit-desc').value,
+                precio: parseFloat(document.getElementById('edit-precio').value),
+                categoria: document.getElementById('edit-cat').value
+            };
+            try {
+                const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(datos) });
+                if(res.ok) { 
+                    alert("¡Anuncio actualizado!"); 
+                    cargarDatosCentrales(); 
+                    cambiarPantalla('pantalla-tienda'); 
+                } else {
+                    alert("Error: " + (await res.json()).detail);
+                }
+            } catch(e) { alert("Error al conectar"); }
+        }
+
+        async function borrarAnuncio(idAnuncio) {
+            if(!confirm("¿Seguro que quieres borrar este anuncio definitivamente? Esta acción no se puede deshacer.")) return;
+            try {
+                const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' });
+                if(res.ok) { 
+                    alert("Anuncio borrado correctamente"); 
+                    cargarDatosCentrales(); 
+                    cambiarPantalla('pantalla-tienda'); 
+                } else {
+                    alert("Error al borrar");
+                }
+            } catch(e) { alert("Error de conexión"); }
+        }
+
+        async function toggleFavorito(idAnuncio) {
+            if (!usuarioActual) { alert("Inicia sesión para guardar favoritos."); cambiarPantalla('pantalla-login'); return; }
+            try { const res = await fetch(`${API_BASE}/favoritos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id_usuario: usuarioActual.id_usuario, id_anuncio: idAnuncio }) }); if(res.ok) cargarDatosCentrales(); } catch(e) {}
+        }
+
+        async function comprarArticulo(idAnuncio) {
+            if (!usuarioActual) { alert("¡Inicia sesión primero!"); cambiarPantalla('pantalla-login'); return; }
+            if (!confirm("¿Confirmas la compra?")) return;
+            try { const res = await fetch(`${API_BASE}/comprar/${idAnuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
+                if (res.ok) { alert("¡Compra confirmada!"); if(document.getElementById('pantalla-detalle').classList.contains('block')) cambiarPantalla('pantalla-tienda'); else cargarDatosCentrales(); }
+            } catch(e) {}
+        }
+
+        function leerArchivoComoBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = e => reject(e); }); }
+        document.getElementById('reg-foto').addEventListener('change', async function(e) { if(e.target.files.length > 0) document.getElementById('preview-perfil-reg').innerHTML = `<img src="${await leerArchivoComoBase64(e.target.files[0])}" class="w-full h-full object-cover">`; });
+        document.getElementById('nuevo-imagenes').addEventListener('change', async function(e) { const p = document.getElementById('preview-imagenes'); p.innerHTML = ''; for(let i=0; i<e.target.files.length; i++) p.innerHTML += `<img src="${await leerArchivoComoBase64(e.target.files[i])}" class="w-16 h-16 object-cover rounded-md border shadow-sm">`; });
+        function mostrarOcultarPass(inputId, iconoId) { const i = document.getElementById(inputId), ic = document.getElementById(iconoId); if(i.type==="password"){i.type="text"; ic.className="fa-regular fa-eye-slash";}else{i.type="password"; ic.className="fa-regular fa-eye";} }
+        
+        async function subirAnuncioReal() {
+            if (!usuarioActual) { alert("¡Inicia sesión para publicar!"); cambiarPantalla('pantalla-login'); return; }
+            const inputImagenes = document.getElementById('nuevo-imagenes'); const arrayFotos = [];
+            for(let i=0; i<inputImagenes.files.length; i++) arrayFotos.push(await leerArchivoComoBase64(inputImagenes.files[i]));
+            const anuncio = { id_usuario: usuarioActual.id_usuario, titulo: document.getElementById('nuevo-titulo').value, descripcion: document.getElementById('nuevo-desc').value, precio: parseFloat(document.getElementById('nuevo-precio').value), categoria: document.getElementById('nuevo-cat').value, imagenes: arrayFotos };
+            try { const res = await fetch(`${API_BASE}/anuncios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(anuncio) }); if (res.ok) { alert("¡Anuncio publicado!"); cambiarPestanaPerfil('venta'); cambiarPantalla('pantalla-perfil'); } else alert("Moderación: " + (await res.json()).detail); } catch(e) {}
+        }
+
+        async function intentarLogin() {
+            try { const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('email-login').value, contrasena: document.getElementById('pass-login').value}) }); const data = await res.json(); if(res.ok) iniciarSesionUI(data); else alert("Error: " + data.detail); } catch(e) {}
+        }
+
+        async function intentarRegistro() {
+            const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; if(!nom || !em || !pa) return alert("Rellena todos los campos");
+            let foto = ""; if(document.getElementById('reg-foto').files.length > 0) foto = await leerArchivoComoBase64(document.getElementById('reg-foto').files[0]);
+            try { const res = await fetch(`${API_BASE}/registro`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre: nom, email: em, contrasena: pa, foto_perfil: foto}) }); const data = await res.json(); if(res.ok) { alert("¡Cuenta creada!"); iniciarSesionUI(data); } else alert("Error: " + data.detail); } catch(e) {}
+        }
+
+        function iniciarSesionUI(data) {
+            usuarioActual = data; document.getElementById('btn-login').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('hidden'); document.getElementById('contenedor-perfil').classList.add('flex'); document.getElementById('texto-nombre').innerText = data.usuario; 
+            
+            // Si es admin, ponemos el título de perfil en rojo para diferenciar
+            document.getElementById('perfil-titulo').innerHTML = data.rol === 'moderador' ? `Panel de Administrador <i class="fa-solid fa-shield text-red-500"></i>` : `Mi Perfil`;
+            
+            const av = data.foto_perfil ? `<img src="${data.foto_perfil}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-blue-600 text-sm"></i>`;
+            document.getElementById('nav-foto-perfil').innerHTML = av; document.getElementById('perfil-foto-grande').innerHTML = data.foto_perfil ? `<img src="${data.foto_perfil}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user"></i>`;
             cambiarPantalla('pantalla-tienda');
         }
+
+        function cerrarSesion() { if(confirm("¿Cerrar sesión?")) { usuarioActual = null; misFavoritos = []; document.getElementById('contenedor-perfil').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('flex'); document.getElementById('btn-login').classList.remove('hidden'); cambiarPantalla('pantalla-tienda'); } }
     </script>
 </body>
 </html>

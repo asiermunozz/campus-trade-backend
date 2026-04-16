@@ -1,31 +1,36 @@
-# api/moderacion.py
+import re
 
-# Lista negra de ejemplo (podéis añadir más)
-PALABRAS_PROHIBIDAS = ["timo", "estafa", "falso", "insulto"]
+# Tu lista negra de palabras y frases prohibidas (limpia de duplicados)
+PALABRAS_PROHIBIDAS = [
+    "marihuana", "maria", "porros", "hachis", "polen", "cocaína", "coca", "keta", "mdma", "cristal", "speed", "setas", "lsd", "xanax", "trankimazin", "adderall", "ritalin", "esteroides", "anabolizantes", "testosterona", "farmacia", "receta", "antibiótico",
+    "porno", "erotico", "sexshop", "consolador", "vibrador", "escort", "masajes", "citas", "sugar daddy", "sugar baby", "onlyfans", "desnuda", "desnudo",
+    "pistola", "revolver", "municion", "rifle", "escopeta", "navaja", "puñal", "puño americano", "taser", "spray pimienta", "petardos", "polvora",
+    "hago examen", "hago tfg", "hago tfm", "hago deberes", "pinganillo", "chuleta", "examen filtrado",
+    "billetes falsos", "dinero negro", "cripto", "inversion rapida",
+    "netflix", "spotify", "hbo", "disney+", "dazn", "cuentas", "premium",
+    "tabaco", "vaper", "cigarrillo", "alcohol", "vodka", "ron", "ginebra",
+    "perro en venta", "gato en venta", "cachorro", "donar organos",
+    "vender cuenta", "seguidores instagram",
+    "joder", "gilipollas", "cabron", "cabrona", "mierda", "puta", "puto", "puton", "maricon", "mariconazo", "zorra", "zorro", "polla", "coño", "rabo", "nabo", "cojones", "pelotas", "jilipollas", "subnormal", "retrasado", "imbecil", "estupido", "capullo", "mamon", "mamona", "meada", "meado", "cagar", "cagada", "marica", "bollo", "bollera", "travelo", "sudaca", "panchi", "negrata", "moro", "guiri", "asqueroso", "malparido", "pendejo", "culiao", "concha", "chupa", "follar"
+]
 
-def validar_anuncio(titulo, descripcion, precio, categoria):
-    """
-    Evalúa un anuncio basándose en las reglas de moderación.
-    Devuelve un diccionario con el resultado.
-    """
-    
-    # 1. Regla: Validar campos vacíos o nulos
-    if not titulo or not descripcion or not categoria:
-        return {"valido": False, "motivo": "Faltan campos obligatorios por rellenar."}
-    
-    # 2. Regla: Validar precios absurdos o negativos
+def validar_anuncio(titulo: str, descripcion: str, precio: float, categoria: str) -> dict:
+    # 1. Filtro básico de precio
     if precio < 0:
         return {"valido": False, "motivo": "El precio no puede ser negativo."}
-    if precio > 10000:
-        return {"valido": False, "motivo": "El precio excede el límite permitido para estudiantes."}
     
-    # 3. Regla: Filtro de palabras prohibidas (Lista Negra)
-    texto_completo = (titulo + " " + descripcion).lower()
+    # 2. Unimos el título y la descripción, y lo pasamos todo a minúsculas
+    texto_completo = f"{titulo} {descripcion}".lower()
+
+    # 3. Filtro de contenido prohibido
     for palabra in PALABRAS_PROHIBIDAS:
-        if palabra in texto_completo:
-            return {"valido": False, "motivo": f"El anuncio contiene lenguaje no permitido: '{palabra}'."}
-            
-    # (Aquí irían en el futuro las reglas de revisar el historial del usuario y la imagen)
-    
-    # Si sobrevive a todos los filtros, es válido
-    return {"valido": True, "motivo": "Anuncio apto para publicación."}
+        # El \b asegura que busque la palabra completa, no trozos de otras palabras.
+        # re.escape() asegura que si la frase tiene un "+", no rompa el código.
+        patron = r'\b' + re.escape(palabra) + r'\b'
+        
+        if re.search(patron, texto_completo):
+            # Si encuentra coincidencia, detiene la publicación instantáneamente
+            return {"valido": False, "motivo": f"El anuncio contiene vocabulario no permitido ('{palabra}')."}
+
+    # Si pasa todos los filtros, damos luz verde
+    return {"valido": True, "motivo": "Anuncio correcto."}
