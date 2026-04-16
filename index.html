@@ -15,14 +15,14 @@
             <span class="text-xl font-bold text-gray-900">CampusTrade</span>
         </div>
         <div class="flex items-center gap-4 text-gray-600">
-            <button onclick="cambiarPantalla('pantalla-publicar')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+            <button onclick="cambiarPantalla('pantalla-publicar')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
                 + Vender
             </button>
-            <button id="btn-login" onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition ml-2">
+            <button id="btn-login" onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition ml-2 font-bold">
                 Entrar <i class="fa-solid fa-right-to-bracket ml-1"></i>
             </button>
             <div id="contenedor-perfil" class="hidden items-center gap-3 ml-2">
-                <button onclick="cambiarPantalla('pantalla-perfil')" class="bg-gray-100 hover:bg-gray-200 pl-2 pr-4 py-1.5 rounded-full transition flex items-center gap-2">
+                <button onclick="cambiarPantalla('pantalla-perfil')" class="bg-gray-100 hover:bg-gray-200 pl-2 pr-4 py-1.5 rounded-full transition flex items-center gap-2 border">
                     <div id="nav-foto-perfil" class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
                         <i class="fa-solid fa-user text-blue-600 text-sm"></i>
                     </div>
@@ -52,7 +52,7 @@
                 <option value="Moda y Graduaciones">Moda y Graduaciones</option>
                 <option value="Deporte y Ocio">Deporte y Ocio</option>
                 <option value="Transporte y Movilidad">Transporte y Movilidad</option>
-                <option value="Servicios (Clases y Mudanzas)">Servicios (Clases y Mudanzas)</option>
+                <option value="Servicios (Clases y Mudanzas)">Servicios</option>
                 <option value="Regalos y Varios">Regalos y Varios</option>
                 <option value="Otros">Otros</option>
             </select>
@@ -70,16 +70,122 @@
                 <div class="flex gap-2 overflow-x-auto pb-2" id="detalle-miniaturas"></div>
             </div>
             <div class="w-full md:w-1/2 flex flex-col">
-                <span class="text-sm font-bold text-blue-600 uppercase tracking-wide bg-blue-50 px-3 py-1 rounded-full w-max mb-2" id="detalle-categoria"></span>
+                <span class="text-sm font-bold text-blue-600 uppercase tracking-wide bg-blue-50 px-3 py-1 rounded-full w-max mb-2 border border-blue-100" id="detalle-categoria"></span>
                 <h2 class="text-3xl font-bold mb-4 text-gray-800" id="detalle-titulo"></h2>
                 <p class="text-4xl font-extrabold text-gray-900 mb-6" id="detalle-precio"></p>
                 <h3 class="font-bold text-lg mb-2 border-b pb-2">Descripción</h3>
                 <p class="text-gray-600 mb-6 whitespace-pre-wrap flex-1" id="detalle-desc"></p>
                 
-                <div class="bg-gray-50 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4" id="detalle-info-vendedor">
-                    </div>
+                <div class="bg-gray-50 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4" id="detalle-info-vendedor"></div>
 
                 <div id="detalle-zona-boton" class="mt-auto pt-6 border-t"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pantalla-checkout" class="pantalla hidden max-w-5xl mx-auto px-6 py-8">
+        <button onclick="cambiarPantalla('pantalla-tienda')" class="mb-6 text-gray-500 hover:text-blue-600 font-bold flex items-center gap-2 transition">
+            <i class="fa-solid fa-arrow-left"></i> Cancelar compra
+        </button>
+
+        <h2 class="text-3xl font-bold mb-8">Finalizar Pedido</h2>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="w-full lg:w-2/3 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot text-blue-600"></i> Opciones de Entrega</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition border-blue-600 bg-blue-50">
+                            <input type="radio" name="entrega" checked class="w-5 h-5 text-blue-600">
+                            <div>
+                                <p class="font-bold">Entrega en mano (Campus)</p>
+                                <p class="text-sm text-gray-500">Gratis. Queda con el vendedor en la uni.</p>
+                            </div>
+                        </label>
+                        <select class="w-full p-3 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 mt-2">
+                            <option>Punto de encuentro: Cafetería Central</option>
+                            <option>Punto de encuentro: Biblioteca</option>
+                            <option>Punto de encuentro: Entrada Facultad</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-credit-card text-blue-600"></i> Método de Pago</h3>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <button class="flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition">
+                            <i class="fa-regular fa-credit-card"></i> Tarjeta
+                        </button>
+                        <button class="flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition">
+                            <i class="fa-solid fa-mobile-screen"></i> Bizum
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Titular de la tarjeta</label>
+                            <input type="text" id="pago-nombre" placeholder="Nombre completo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Número de tarjeta</label>
+                            <div class="relative">
+                                <i class="fa-brands fa-cc-visa absolute right-3 top-3 text-2xl text-gray-300"></i>
+                                <input type="text" placeholder="0000 0000 0000 0000" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Caducidad</label>
+                                <input type="text" placeholder="MM/AA" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">CVV</label>
+                                <input type="text" placeholder="123" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/3">
+                <div class="bg-white p-6 rounded-2xl border shadow-sm sticky top-24">
+                    <h3 class="text-xl font-bold mb-4">Resumen</h3>
+                    
+                    <div class="flex gap-4 mb-6 pb-6 border-b">
+                        <div id="checkout-foto" class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border shrink-0 flex items-center justify-center"></div>
+                        <div>
+                            <h4 id="checkout-titulo" class="font-bold text-gray-800 line-clamp-2"></h4>
+                            <p class="text-sm text-gray-500 mt-1" id="checkout-vendedor"></p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6 text-sm text-gray-600">
+                        <div class="flex justify-between">
+                            <span>Subtotal artículo</span>
+                            <span id="checkout-subtotal" class="font-bold text-gray-800"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Protección al comprador (Seguro)</span>
+                            <span class="font-bold text-gray-800">€0.99</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Gastos de envío (Campus)</span>
+                            <span class="font-bold text-green-600">Gratis</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end pt-4 border-t mb-6">
+                        <span class="font-bold text-gray-800">Total a pagar</span>
+                        <span id="checkout-total" class="text-3xl font-black text-gray-900"></span>
+                    </div>
+
+                    <button onclick="procesarPagoFinal()" id="btn-pagar" class="w-full bg-black text-white text-lg font-bold py-4 rounded-xl hover:bg-gray-800 transition shadow-lg flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-lock"></i> Pagar de forma segura
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-4"><i class="fa-solid fa-shield-halved"></i> Tus datos están cifrados y seguros. Esto es un entorno de pruebas.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -189,7 +295,7 @@
                 <input id="pass-login" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="button" onclick="mostrarOcultarPass('pass-login', 'icono-ojo-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-login" class="fa-regular fa-eye"></i></button>
             </div>
-            <button onclick="intentarLogin()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Entrar</button>
+            <button onclick="intentarLogin()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-md">Entrar</button>
             <p class="text-center text-sm text-gray-500 mt-6">¿No tienes cuenta? <span onclick="cambiarPantalla('pantalla-registro')" class="text-blue-600 font-bold cursor-pointer hover:underline">Regístrate aquí</span></p>
         </div>
     </div>
@@ -209,7 +315,7 @@
                 <input id="reg-pass" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="button" onclick="mostrarOcultarPass('reg-pass', 'icono-ojo-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-reg" class="fa-regular fa-eye"></i></button>
             </div>
-            <button onclick="intentarRegistro()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition">Registrarse</button>
+            <button onclick="intentarRegistro()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition shadow-md">Registrarse</button>
             <p class="text-center text-sm text-gray-500 mt-6">¿Ya tienes cuenta? <span onclick="cambiarPantalla('pantalla-login')" class="text-blue-600 font-bold cursor-pointer hover:underline">Inicia sesión</span></p>
         </div>
     </div>
@@ -220,6 +326,7 @@
         let anunciosGlobales = []; 
         let misFavoritos = []; 
         let pestanaPerfilActual = 'venta';
+        let articuloEnCheckout = null; // NUEVO: Guarda el artículo que estamos a punto de comprar
 
         window.onload = cargarDatosCentrales;
 
@@ -276,7 +383,7 @@
                 } else if (pestanaPerfilActual === 'favoritos') {
                     if (misFavoritos.includes(anuncio.id_anuncio) && anuncio.estado !== 'vendido') {
                         mostrar = true;
-                        botonesCard = `<button onclick="event.stopPropagation(); comprarArticulo(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm mt-2">Comprar</button>`;
+                        botonesCard = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm mt-2 hover:bg-green-700">Comprar</button>`;
                     }
                 } else if (pestanaPerfilActual === 'comprados') {
                     if (anuncio.id_comprador === usuarioActual.id_usuario) {
@@ -317,12 +424,12 @@
                     
                     let btn = "";
                     if (esMio) {
-                        btn = `<span class="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded">Es tuyo</span>`;
+                        btn = `<span class="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded border">Es tuyo</span>`;
                     } else if (esAdmin) {
-                        // NUEVO: Botón especial para el Admin en la tienda
                         btn = `<button onclick="event.stopPropagation(); verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-200 transition shadow-sm border border-red-200"><i class="fa-solid fa-shield-halved"></i> Gestionar</button>`;
                     } else {
-                        btn = `<button onclick="event.stopPropagation(); comprarArticulo(${anuncio.id_anuncio})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-sm">Comprar</button>`;
+                        // CAMBIO CLAVE: Ahora llama a iniciarCheckout en vez de comprar directamente
+                        btn = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-md">Comprar</button>`;
                     }
 
                     grid.innerHTML += generarTarjetaHTML(anuncio, btn, false);
@@ -338,7 +445,6 @@
             
             let corazonHtml = "";
             const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
-            // Ocultamos el corazón si es admin (los admin moderan, no compran)
             if (!esPerfil && usuarioActual && anuncio.id_usuario !== usuarioActual.id_usuario && anuncio.estado !== 'vendido' && !esAdmin) {
                 const esFav = misFavoritos.includes(anuncio.id_anuncio);
                 corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
@@ -378,7 +484,6 @@
             document.getElementById('detalle-desc').innerText = anuncio.descripcion;
 
             const avatarHtml = anuncio.vendedor_foto ? `<img src="${anuncio.vendedor_foto}" class="w-12 h-12 rounded-full object-cover shadow-sm">` : `<div class="w-12 h-12 bg-blue-200 text-blue-600 rounded-full flex items-center justify-center text-lg"><i class="fa-solid fa-user"></i></div>`;
-            
             document.getElementById('detalle-info-vendedor').innerHTML = `
                 <div class="flex items-center gap-3">
                     ${avatarHtml}
@@ -405,12 +510,10 @@
 
             const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario);
             const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
-            
             const zonaBoton = document.getElementById('detalle-zona-boton');
 
             if (anuncio.estado === 'vendido') {
                 zonaBoton.innerHTML = `<div class="bg-gray-100 text-gray-500 font-bold p-4 rounded-xl text-center"><i class="fa-solid fa-lock"></i> Vendido</div>`;
-                // Si es admin, dejamos borrar los vendidos también
                 if (esAdmin) {
                      zonaBoton.innerHTML += `
                      <div class="mt-4 pt-4 border-t border-red-100">
@@ -419,7 +522,7 @@
                      </div>`;
                 }
             } else if (esMio || esAdmin) {
-                let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Estás modificando este anuncio como Administrador</p>` : "";
+                let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Modificando como Administrador</p>` : "";
                 zonaBoton.innerHTML = `
                     ${badgeAdmin}
                     <div class="flex gap-4">
@@ -428,11 +531,74 @@
                     </div>
                 `;
             } else {
-                zonaBoton.innerHTML = `<button onclick="comprarArticulo(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
+                // CAMBIO CLAVE: Llama al Checkout
+                zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
             }
             cambiarPantalla('pantalla-detalle');
         }
 
+        // --- NUEVO: SISTEMA DE CHECKOUT REALISTA ---
+        function iniciarCheckout(idAnuncio) {
+            if (!usuarioActual) { 
+                alert("¡Para comprar necesitas iniciar sesión primero!"); 
+                cambiarPantalla('pantalla-login'); 
+                return; 
+            }
+            
+            articuloEnCheckout = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
+            if (!articuloEnCheckout) return;
+
+            // Rellenar datos visuales del resumen
+            document.getElementById('checkout-titulo').innerText = articuloEnCheckout.titulo;
+            document.getElementById('checkout-vendedor').innerText = `Vendido por: ${articuloEnCheckout.vendedor_nombre}`;
+            document.getElementById('checkout-subtotal').innerText = `€${articuloEnCheckout.precio.toFixed(2)}`;
+            
+            const total = articuloEnCheckout.precio + 0.99; // Precio + Seguro ficticio
+            document.getElementById('checkout-total').innerText = `€${total.toFixed(2)}`;
+
+            if (articuloEnCheckout.imagenes && articuloEnCheckout.imagenes.length > 0) {
+                document.getElementById('checkout-foto').innerHTML = `<img src="${articuloEnCheckout.imagenes[0]}" class="w-full h-full object-cover">`;
+            } else {
+                document.getElementById('checkout-foto').innerHTML = `<i class="fa-solid fa-box text-3xl text-gray-300"></i>`;
+            }
+
+            // Nombre automático en la tarjeta
+            document.getElementById('pago-nombre').value = usuarioActual.usuario;
+
+            cambiarPantalla('pantalla-checkout');
+        }
+
+        async function procesarPagoFinal() {
+            if (!articuloEnCheckout) return;
+            
+            const btnPagar = document.getElementById('btn-pagar');
+            const textoOriginal = btnPagar.innerHTML;
+            
+            // Efecto visual de carga
+            btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando pago...`;
+            btnPagar.disabled = true;
+
+            // Simulamos un retraso de 1.5 segundos de "conexión con el banco"
+            setTimeout(async () => {
+                try { 
+                    const res = await fetch(`${API_BASE}/comprar/${articuloEnCheckout.id_anuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
+                    if (res.ok) { 
+                        alert("¡Pago aceptado! La compra se ha realizado con éxito."); 
+                        await cargarDatosCentrales(); 
+                        cambiarPestanaPerfil('comprados');
+                        cambiarPantalla('pantalla-perfil');
+                    }
+                } catch(e) { 
+                    alert("Error conectando con el servidor."); 
+                } finally {
+                    btnPagar.innerHTML = textoOriginal;
+                    btnPagar.disabled = false;
+                    articuloEnCheckout = null;
+                }
+            }, 1500);
+        }
+
+        // --- EDITAR Y BORRAR ---
         function abrirEditor(idAnuncio) {
             const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
             if(!anuncio) return;
@@ -443,53 +609,25 @@
             document.getElementById('edit-cat').value = anuncio.categoria;
             cambiarPantalla('pantalla-editar');
         }
-
         async function guardarEdicionAnuncio() {
             const idAnuncio = document.getElementById('edit-id').value;
-            const datos = {
-                id_usuario: usuarioActual.id_usuario,
-                titulo: document.getElementById('edit-titulo').value,
-                descripcion: document.getElementById('edit-desc').value,
-                precio: parseFloat(document.getElementById('edit-precio').value),
-                categoria: document.getElementById('edit-cat').value
-            };
+            const datos = { id_usuario: usuarioActual.id_usuario, titulo: document.getElementById('edit-titulo').value, descripcion: document.getElementById('edit-desc').value, precio: parseFloat(document.getElementById('edit-precio').value), categoria: document.getElementById('edit-cat').value };
             try {
                 const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(datos) });
-                if(res.ok) { 
-                    alert("¡Anuncio actualizado!"); 
-                    cargarDatosCentrales(); 
-                    cambiarPantalla('pantalla-tienda'); 
-                } else {
-                    alert("Error: " + (await res.json()).detail);
-                }
-            } catch(e) { alert("Error al conectar"); }
+                if(res.ok) { alert("¡Anuncio actualizado!"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); } else alert("Error: " + (await res.json()).detail);
+            } catch(e) {}
         }
-
         async function borrarAnuncio(idAnuncio) {
-            if(!confirm("¿Seguro que quieres borrar este anuncio definitivamente? Esta acción no se puede deshacer.")) return;
+            if(!confirm("¿Borrar definitivamente?")) return;
             try {
                 const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' });
-                if(res.ok) { 
-                    alert("Anuncio borrado correctamente"); 
-                    cargarDatosCentrales(); 
-                    cambiarPantalla('pantalla-tienda'); 
-                } else {
-                    alert("Error al borrar");
-                }
-            } catch(e) { alert("Error de conexión"); }
+                if(res.ok) { alert("Borrado correctamente"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); }
+            } catch(e) {}
         }
 
         async function toggleFavorito(idAnuncio) {
             if (!usuarioActual) { alert("Inicia sesión para guardar favoritos."); cambiarPantalla('pantalla-login'); return; }
             try { const res = await fetch(`${API_BASE}/favoritos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id_usuario: usuarioActual.id_usuario, id_anuncio: idAnuncio }) }); if(res.ok) cargarDatosCentrales(); } catch(e) {}
-        }
-
-        async function comprarArticulo(idAnuncio) {
-            if (!usuarioActual) { alert("¡Inicia sesión primero!"); cambiarPantalla('pantalla-login'); return; }
-            if (!confirm("¿Confirmas la compra?")) return;
-            try { const res = await fetch(`${API_BASE}/comprar/${idAnuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
-                if (res.ok) { alert("¡Compra confirmada!"); if(document.getElementById('pantalla-detalle').classList.contains('block')) cambiarPantalla('pantalla-tienda'); else cargarDatosCentrales(); }
-            } catch(e) {}
         }
 
         function leerArchivoComoBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = e => reject(e); }); }
@@ -508,7 +646,6 @@
         async function intentarLogin() {
             try { const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('email-login').value, contrasena: document.getElementById('pass-login').value}) }); const data = await res.json(); if(res.ok) iniciarSesionUI(data); else alert("Error: " + data.detail); } catch(e) {}
         }
-
         async function intentarRegistro() {
             const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; if(!nom || !em || !pa) return alert("Rellena todos los campos");
             let foto = ""; if(document.getElementById('reg-foto').files.length > 0) foto = await leerArchivoComoBase64(document.getElementById('reg-foto').files[0]);
@@ -517,15 +654,11 @@
 
         function iniciarSesionUI(data) {
             usuarioActual = data; document.getElementById('btn-login').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('hidden'); document.getElementById('contenedor-perfil').classList.add('flex'); document.getElementById('texto-nombre').innerText = data.usuario; 
-            
-            // Si es admin, ponemos el título de perfil en rojo para diferenciar
             document.getElementById('perfil-titulo').innerHTML = data.rol === 'moderador' ? `Panel de Administrador <i class="fa-solid fa-shield text-red-500"></i>` : `Mi Perfil`;
-            
             const av = data.foto_perfil ? `<img src="${data.foto_perfil}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-blue-600 text-sm"></i>`;
             document.getElementById('nav-foto-perfil').innerHTML = av; document.getElementById('perfil-foto-grande').innerHTML = data.foto_perfil ? `<img src="${data.foto_perfil}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user"></i>`;
             cambiarPantalla('pantalla-tienda');
         }
-
         function cerrarSesion() { if(confirm("¿Cerrar sesión?")) { usuarioActual = null; misFavoritos = []; document.getElementById('contenedor-perfil').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('flex'); document.getElementById('btn-login').classList.remove('hidden'); cambiarPantalla('pantalla-tienda'); } }
     </script>
 </body>
