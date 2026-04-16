@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Trade | Compra y Vende en la Uni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+
+    <nav class="bg-indigo-700 text-white p-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-tight">Campus Trade</h1>
+            <button onclick="toggleForm()" class="bg-white text-indigo-700 px-4 py-2 rounded-full font-semibold hover:bg-indigo-50 transition">
+                + Publicar Anuncio
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto py-10 px-4">
+        
+        <section id="zona-publicar" class="hidden mb-12 bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">¿Qué quieres vender?</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <input id="titulo" type="text" placeholder="Título (ej: Calculadora Casio)" class="p-3 bg-slate-100 rounded-lg outline-indigo-500">
+                <textarea id="desc" placeholder="Descripción del producto..." class="p-3 bg-slate-100 rounded-lg h-24 outline-indigo-500"></textarea>
+                
+                <div class="flex gap-4">
+                    <input id="precio" type="number" placeholder="Precio (€)" class="w-1/2 p-3 bg-slate-100 rounded-lg outline-indigo-500">
+                    <select id="cat" class="w-1/2 p-3 bg-slate-100 rounded-lg outline-indigo-500">
+                        <option value="Libros">Libros</option>
+                        <option value="Electronica">Electrónica</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+
+                <button onclick="enviarAlBackend()" class="mt-4 bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-800 transition shadow-lg">
+                    Subir anuncio a moderación
+                </button>
+            </div>
+        </section>
+
+        <h2 class="text-xl font-bold mb-6 text-slate-700">Anuncios Recientes</h2>
+        <div id="contenedor-anuncios" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+    </main>
+
+    <script>
+        function toggleForm() {
+            const form = document.getElementById('zona-publicar');
+            form.classList.toggle('hidden');
+        }
+
+        async function enviarAlBackend() {
+            // RECUERDA: Cambia esto por tu URL de Vercel cuando lo subas
+            const URL_API = "http://127.0.0.1:8000/api/anuncios";
+
+            const anuncio = {
+                id_usuario: 1,
+                titulo: document.getElementById('titulo').value,
+                descripcion: document.getElementById('desc').value,
+                precio: parseFloat(document.getElementById('precio').value),
+                categoria: document.getElementById('cat').value
+            };
+
+            try {
+                const response = await fetch(URL_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(anuncio)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("¡Éxito! El anuncio ha pasado el filtro y está guardado.");
+                    location.reload(); 
+                } else {
+                    alert("Moderación rechazada: " + data.detail);
+                }
+            } catch (error) {
+                alert("Error: No se pudo conectar con el servidor backend.");
+            }
+        }
+    </script>
+</body>
+</html>

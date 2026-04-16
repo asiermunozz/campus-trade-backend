@@ -2,13 +2,24 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import sqlite3
 from api.moderacion import validar_anuncio
+from fastapi.middleware.cors import CORSMiddleware # <-- NUEVO: Importamos CORS
 
-# Inicializamos la aplicación
 app = FastAPI(
     title="Campus Trade API",
     description="API REST para la gestión de anuncios de estudiantes",
     version="1.0"
 )
+
+# <-- NUEVO: Le damos permiso a la web para conectarse
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Permite que cualquier web se conecte
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ... (El resto de tu código de las rutas sigue igual hacia abajo) ...
 
 # Definimos el "molde" de los datos que el usuario nos tiene que enviar
 class NuevoAnuncio(BaseModel):
