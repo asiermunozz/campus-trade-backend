@@ -199,7 +199,7 @@ def hacer_login(cred: Credenciales):
     if usuario: return {"status": "ok", "id_usuario": usuario["id_usuario"], "rol": usuario["rol"], "usuario": usuario["nombre"], "foto_perfil": usuario["foto_perfil"]}
     
     # ADMIN POR DEFECTO
-    if cred.email == "admin@campus.edu" and cred.contrasena == "admin123": 
+    if cred.email == "admin@campus.uan" and cred.contrasena == "admin123": 
         return {"status": "ok", "id_usuario": 1, "rol": "moderador", "usuario": "Admin", "foto_perfil": ""}
         
     raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")

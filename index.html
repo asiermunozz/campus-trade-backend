@@ -6,7 +6,6 @@
     <title>CampusTrade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
@@ -35,7 +34,7 @@
         </div>
         <div class="flex items-center gap-4 text-gray-600">
             <button onclick="intentarPublicar()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
-                + Vender
+                + Anunciar
             </button>
             <button id="btn-login" onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition ml-2 font-bold">
                 Entrar <i class="fa-solid fa-right-to-bracket ml-1"></i>
@@ -148,20 +147,20 @@
                             <input type="text" id="pago-nombre" placeholder="Nombre completo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Número de tarjeta</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Número de tarjeta (16 dígitos)</label>
                             <div class="relative">
                                 <i class="fa-brands fa-cc-visa absolute right-3 top-3 text-2xl text-gray-300"></i>
-                                <input type="text" placeholder="0000 0000 0000 0000" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                                <input type="text" id="pago-tarjeta-num" placeholder="0000 0000 0000 0000" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-1">Caducidad</label>
-                                <input type="text" placeholder="MM/AA" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                                <input type="text" id="pago-tarjeta-cad" placeholder="MM/AA" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-1">CVV</label>
-                                <input type="text" placeholder="123" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                                <input type="text" id="pago-tarjeta-cvv" placeholder="123" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-center">
                             </div>
                         </div>
                     </div>
@@ -175,7 +174,7 @@
                             <label class="block text-sm font-bold text-gray-700 mb-1">Tu número de teléfono móvil</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-3.5 text-gray-500 font-bold border-r pr-3">+34</span>
-                                <input type="tel" placeholder="600 000 000" class="w-full p-3 pl-16 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg tracking-wider">
+                                <input type="tel" id="pago-bizum-tlf" placeholder="600 000 000" class="w-full p-3 pl-16 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg tracking-wider">
                             </div>
                         </div>
                     </div>
@@ -235,7 +234,7 @@
 
     <div id="pantalla-publicar" class="pantalla hidden max-w-2xl mx-auto px-6 py-10">
         <div class="bg-white p-8 rounded-2xl shadow-md border">
-            <h2 class="text-2xl font-bold mb-6">¿Qué quieres vender?</h2>
+            <h2 class="text-2xl font-bold mb-6">¿Qué quieres anunciar?</h2>
             <div class="space-y-4">
                 <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition cursor-pointer relative">
                     <i class="fa-solid fa-images text-4xl text-gray-400 mb-2"></i>
@@ -244,7 +243,7 @@
                     <div id="preview-imagenes" class="mt-4 flex gap-2 justify-center flex-wrap"></div>
                 </div>
                 <input id="nuevo-titulo" type="text" placeholder="Título (ej: Apuntes de Física)" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                <textarea id="nuevo-desc" placeholder="Descripción del producto..." class="w-full p-3 bg-gray-50 border rounded-lg h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <textarea id="nuevo-desc" placeholder="Descripción del producto o servicio..." class="w-full p-3 bg-gray-50 border rounded-lg h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 <div class="grid grid-cols-2 gap-4">
                     <input id="nuevo-precio" type="number" placeholder="Precio (€)" class="p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
                     <select id="nuevo-cat" class="p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-gray-700">
@@ -308,7 +307,7 @@
     <div id="pantalla-login" class="pantalla hidden flex items-center justify-center min-h-[80vh]">
         <div class="bg-white p-8 rounded-xl shadow-md border w-full max-w-md">
             <h2 class="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
-            <input id="email-login" type="email" placeholder="Correo (@campus.edu)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="email-login" type="email" placeholder="Correo (@campus.uan)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
             <div class="relative mb-6">
                 <input id="pass-login" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="button" onclick="mostrarOcultarPass('pass-login', 'icono-ojo-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-login" class="fa-regular fa-eye"></i></button>
@@ -328,7 +327,7 @@
                 </div>
             </div>
             <input id="reg-nombre" type="text" placeholder="Tu Nombre" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
-            <input id="reg-email" type="email" placeholder="Correo (@campus.edu)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <input id="reg-email" type="email" placeholder="Correo (@campus.uan)" class="w-full bg-gray-50 border rounded-lg p-3 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
             <div class="relative mb-6">
                 <input id="reg-pass" type="password" placeholder="Contraseña" class="w-full bg-gray-50 border rounded-lg p-3 pr-10 outline-none focus:ring-2 focus:ring-blue-500">
                 <button type="button" onclick="mostrarOcultarPass('reg-pass', 'icono-ojo-reg')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"><i id="icono-ojo-reg" class="fa-regular fa-eye"></i></button>
@@ -340,158 +339,139 @@
 
     <script>
         const API_BASE = "http://127.0.0.1:8000/api";
+        const DOMINIO_UAN = "@campus.uan"; // Variable de seguridad central
         let usuarioActual = null; 
         let anunciosGlobales = []; 
         let misFavoritos = []; 
         let pestanaPerfilActual = 'venta';
         let articuloEnCheckout = null;
 
-        // --- SISTEMA DE NOTIFICACIONES TOASTIFY ---
         function mostrarNotificacion(mensaje, tipo = "info") {
-            let bgColor = "linear-gradient(to right, #00b09b, #96c93d)"; // Verde 
-            if (tipo === "error") bgColor = "linear-gradient(to right, #ff5f6d, #ffc371)"; // Rojo
-            else if (tipo === "info") bgColor = "linear-gradient(to right, #2193b0, #6dd5ed)"; // Azul
+            let bgColor = "linear-gradient(to right, #00b09b, #96c93d)"; 
+            if (tipo === "error") bgColor = "linear-gradient(to right, #ff5f6d, #ffc371)"; 
+            else if (tipo === "info") bgColor = "linear-gradient(to right, #2193b0, #6dd5ed)"; 
             
             Toastify({
-                text: mensaje,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
+                text: mensaje, duration: 3000, gravity: "top", position: "right",
                 style: { background: bgColor, borderRadius: "8px", fontWeight: "bold", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" },
                 stopOnFocus: true
             }).showToast();
         }
 
-        // --- NUEVO: SISTEMA DE MODAL DE CONFIRMACIÓN ---
         let accionConfirmacionPendiente = null;
-
         function mostrarConfirmacion(titulo, mensaje, textoBoton, colorBotonClass, accionAceptar) {
             document.getElementById('modal-conf-titulo').innerText = titulo;
             document.getElementById('modal-conf-mensaje').innerText = mensaje;
-            
             const btnAceptar = document.getElementById('modal-conf-btn-aceptar');
             btnAceptar.innerText = textoBoton;
             btnAceptar.className = `px-4 py-2 text-white font-bold rounded-lg transition shadow-md ${colorBotonClass}`;
-            
             accionConfirmacionPendiente = accionAceptar;
-            
             const modal = document.getElementById('modal-confirmacion');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Pequeño timeout para que se active la animación de escala de Tailwind
+            modal.classList.remove('hidden'); modal.classList.add('flex');
             setTimeout(() => {
                 document.getElementById('modal-confirmacion-content').classList.remove('scale-95');
                 document.getElementById('modal-confirmacion-content').classList.add('scale-100');
             }, 10);
         }
-
         function cerrarModalConfirmacion() {
             const modal = document.getElementById('modal-confirmacion');
             document.getElementById('modal-confirmacion-content').classList.remove('scale-100');
             document.getElementById('modal-confirmacion-content').classList.add('scale-95');
-            
-            // Esperamos que termine la animación para ocultarlo
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                accionConfirmacionPendiente = null;
-            }, 200);
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); accionConfirmacionPendiente = null; }, 200);
         }
+        function ejecutarAccionConfirmacion() { if (accionConfirmacionPendiente) { accionConfirmacionPendiente(); } cerrarModalConfirmacion(); }
 
-        function ejecutarAccionConfirmacion() {
-            if (accionConfirmacionPendiente) {
-                accionConfirmacionPendiente();
-            }
-            cerrarModalConfirmacion();
-        }
-
-
-        // --- CARGA Y NAVEGACIÓN ---
         window.onload = cargarDatosCentrales;
-
         async function cargarDatosCentrales() {
             try {
-                const resAnuncios = await fetch(`${API_BASE}/anuncios`);
-                anunciosGlobales = await resAnuncios.json();
-                
-                if (usuarioActual) {
-                    const resFavs = await fetch(`${API_BASE}/favoritos/${usuarioActual.id_usuario}`);
-                    misFavoritos = await resFavs.json();
-                } else { misFavoritos = []; }
-
-                aplicarFiltrosTienda();
-                if(!document.getElementById('pantalla-perfil').classList.contains('hidden')) renderizarPestanaPerfil();
+                const resAnuncios = await fetch(`${API_BASE}/anuncios`); anunciosGlobales = await resAnuncios.json();
+                if (usuarioActual) { const resFavs = await fetch(`${API_BASE}/favoritos/${usuarioActual.id_usuario}`); misFavoritos = await resFavs.json(); } 
+                else { misFavoritos = []; }
+                aplicarFiltrosTienda(); if(!document.getElementById('pantalla-perfil').classList.contains('hidden')) renderizarPestanaPerfil();
             } catch(e) { document.getElementById('grid-productos-tienda').innerHTML = '<p class="text-red-500 p-6 bg-red-50 rounded-xl font-bold">Servidor Python apagado o desconectado.</p>'; }
         }
-
         function cambiarPantalla(id) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            window.scrollTo(0, 0);
+            document.getElementById(id).classList.remove('hidden'); window.scrollTo(0, 0);
             if(id === 'pantalla-tienda' || id === 'pantalla-perfil') cargarDatosCentrales();
         }
-
         function intentarPublicar() {
-            if (!usuarioActual) {
-                mostrarNotificacion("¡Inicia sesión para publicar un anuncio!", "error");
-                cambiarPantalla('pantalla-login');
-            } else {
-                cambiarPantalla('pantalla-publicar');
-            }
+            if (!usuarioActual) { mostrarNotificacion("¡Inicia sesión para publicar un anuncio!", "error"); cambiarPantalla('pantalla-login'); } 
+            else { cambiarPantalla('pantalla-publicar'); }
         }
 
-        // --- CHECKOUT ---
-        function toggleLugarOtro() {
-            const select = document.getElementById('checkout-lugar');
-            const inputOtro = document.getElementById('checkout-lugar-otro');
-            if (select.value === 'otro') { inputOtro.classList.remove('hidden'); } else { inputOtro.classList.add('hidden'); }
-        }
-
+        // --- CHECKOUT BLINDADO CON REGEX ---
+        function toggleLugarOtro() { const sel = document.getElementById('checkout-lugar'), inp = document.getElementById('checkout-lugar-otro'); if (sel.value === 'otro') inp.classList.remove('hidden'); else inp.classList.add('hidden'); }
         function cambiarMetodoPago(metodo) {
             const tabTarjeta = document.getElementById('tab-tarjeta'), tabBizum = document.getElementById('tab-bizum');
             const formTarjeta = document.getElementById('form-tarjeta'), formBizum = document.getElementById('form-bizum');
-
             if (metodo === 'tarjeta') {
                 tabTarjeta.className = "flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition flex justify-center items-center gap-2";
                 tabBizum.className = "flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2";
-                formTarjeta.classList.remove('hidden'); formTarjeta.classList.add('block');
-                formBizum.classList.remove('block'); formBizum.classList.add('hidden');
+                formTarjeta.classList.remove('hidden'); formTarjeta.classList.add('block'); formBizum.classList.remove('block'); formBizum.classList.add('hidden');
             } else {
                 tabBizum.className = "flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition flex justify-center items-center gap-2";
                 tabTarjeta.className = "flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2";
-                formBizum.classList.remove('hidden'); formBizum.classList.add('block');
-                formTarjeta.classList.remove('block'); formTarjeta.classList.add('hidden');
+                formBizum.classList.remove('hidden'); formBizum.classList.add('block'); formTarjeta.classList.remove('block'); formTarjeta.classList.add('hidden');
             }
         }
-
         function iniciarCheckout(idAnuncio) {
             if (!usuarioActual) { mostrarNotificacion("¡Para comprar necesitas iniciar sesión primero!", "error"); cambiarPantalla('pantalla-login'); return; }
-            articuloEnCheckout = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
-            if (!articuloEnCheckout) return;
-
-            document.getElementById('checkout-titulo').innerText = articuloEnCheckout.titulo;
-            document.getElementById('checkout-vendedor').innerText = `Vendido por: ${articuloEnCheckout.vendedor_nombre}`;
-            document.getElementById('checkout-subtotal').innerText = `€${articuloEnCheckout.precio.toFixed(2)}`;
-            const total = articuloEnCheckout.precio + 0.99; 
-            document.getElementById('checkout-total').innerText = `€${total.toFixed(2)}`;
-
-            if (articuloEnCheckout.imagenes && articuloEnCheckout.imagenes.length > 0) {
-                document.getElementById('checkout-foto').innerHTML = `<img src="${articuloEnCheckout.imagenes[0]}" class="w-full h-full object-cover">`;
-            } else { document.getElementById('checkout-foto').innerHTML = `<i class="fa-solid fa-box text-3xl text-gray-300"></i>`; }
-
+            articuloEnCheckout = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if (!articuloEnCheckout) return;
+            document.getElementById('checkout-titulo').innerText = articuloEnCheckout.titulo; document.getElementById('checkout-vendedor').innerText = `Vendido por: ${articuloEnCheckout.vendedor_nombre}`; document.getElementById('checkout-subtotal').innerText = `€${articuloEnCheckout.precio.toFixed(2)}`;
+            document.getElementById('checkout-total').innerText = `€${(articuloEnCheckout.precio + 0.99).toFixed(2)}`;
+            if (articuloEnCheckout.imagenes && articuloEnCheckout.imagenes.length > 0) document.getElementById('checkout-foto').innerHTML = `<img src="${articuloEnCheckout.imagenes[0]}" class="w-full h-full object-cover">`;
+            else document.getElementById('checkout-foto').innerHTML = `<i class="fa-solid fa-box text-3xl text-gray-300"></i>`;
             document.getElementById('pago-nombre').value = usuarioActual.usuario;
-            document.getElementById('checkout-lugar').value = 'cafeteria';
-            document.getElementById('checkout-lugar-otro').classList.add('hidden');
-            cambiarMetodoPago('tarjeta');
-            cambiarPantalla('pantalla-checkout');
+            document.getElementById('pago-tarjeta-num').value = ''; document.getElementById('pago-tarjeta-cad').value = ''; document.getElementById('pago-tarjeta-cvv').value = ''; document.getElementById('pago-bizum-tlf').value = '';
+            document.getElementById('checkout-lugar').value = 'cafeteria'; document.getElementById('checkout-lugar-otro').classList.add('hidden');
+            cambiarMetodoPago('tarjeta'); cambiarPantalla('pantalla-checkout');
         }
 
         async function procesarPagoFinal() {
             if (!articuloEnCheckout) return;
+
+            // 1. VALIDACIÓN DEL LUGAR
+            const lugarSelector = document.getElementById('checkout-lugar').value;
+            if(lugarSelector === 'otro' && document.getElementById('checkout-lugar-otro').value.trim() === '') {
+                return mostrarNotificacion("Por favor, especifica el lugar de entrega.", "error");
+            }
+
+            // 2. VALIDACIONES DE PAGO
+            const esTarjeta = document.getElementById('form-tarjeta').classList.contains('block');
+            
+            if (esTarjeta) {
+                const titular = document.getElementById('pago-nombre').value.trim();
+                const numTarjeta = document.getElementById('pago-tarjeta-num').value.replace(/\s/g, '');
+                const caducidad = document.getElementById('pago-tarjeta-cad').value.trim();
+                const cvv = document.getElementById('pago-tarjeta-cvv').value.trim();
+
+                if (!titular) return mostrarNotificacion("El nombre del titular es obligatorio", "error");
+                // Regex: Exactamente 16 números
+                if (!/^\d{16}$/.test(numTarjeta)) return mostrarNotificacion("El número de tarjeta debe tener 16 dígitos", "error");
+                // Regex: Mes 01 al 12, barra, 2 dígitos de año
+                if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(caducidad)) return mostrarNotificacion("Fecha de caducidad inválida (Usa formato MM/AA)", "error");
+                // Regex: 3 o 4 números
+                if (!/^\d{3,4}$/.test(cvv)) return mostrarNotificacion("El CVV debe tener 3 o 4 dígitos", "error");
+
+                // Comprobación de que no esté caducada en el tiempo real
+                const [mes, anio] = caducidad.split('/');
+                const fechaCaducidad = new Date(`20${anio}`, parseInt(mes) - 1);
+                const hoy = new Date();
+                hoy.setDate(1); hoy.setHours(0,0,0,0); // Ajustamos a día 1 para no penalizar si caduca este mismo mes
+                
+                if (fechaCaducidad < hoy) return mostrarNotificacion("La tarjeta está caducada", "error");
+
+            } else {
+                const telefono = document.getElementById('pago-bizum-tlf').value.replace(/\s/g, '');
+                // Regex: Exactamente 9 números
+                if (!/^\d{9}$/.test(telefono)) return mostrarNotificacion("El número de teléfono para Bizum debe tener 9 dígitos", "error");
+            }
+
+            // 3. PROCESAMIENTO SI TODO ESTÁ OK
             const btnPagar = document.getElementById('btn-pagar');
             const textoOriginal = btnPagar.innerHTML;
-            btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando pago...`;
+            btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando...`;
             btnPagar.disabled = true;
 
             setTimeout(async () => {
@@ -500,31 +480,27 @@
                     if (res.ok) { 
                         mostrarNotificacion("¡Pago aceptado! Compra realizada con éxito.", "exito"); 
                         await cargarDatosCentrales(); 
-                        cambiarPestanaPerfil('comprados');
-                        cambiarPantalla('pantalla-perfil');
+                        cambiarPestanaPerfil('comprados'); cambiarPantalla('pantalla-perfil');
                     }
                 } catch(e) { mostrarNotificacion("Error conectando con el servidor.", "error"); } 
                 finally { btnPagar.innerHTML = textoOriginal; btnPagar.disabled = false; articuloEnCheckout = null; }
             }, 1500);
         }
 
-        // --- PERFIL Y TIENDA ---
+        // --- FUNCIONES DE TABS Y RENDERIZADO ---
         function cambiarPestanaPerfil(pestana) {
             pestanaPerfilActual = pestana;
             ['venta', 'favoritos', 'comprados', 'vendidos'].forEach(t => { document.getElementById(`tab-${t}`).className = "pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent"; });
-            document.getElementById(`tab-${pestana}`).className = "pb-3 border-b-2 font-bold transition border-blue-600 text-blue-600";
-            renderizarPestanaPerfil();
+            document.getElementById(`tab-${pestana}`).className = "pb-3 border-b-2 font-bold transition border-blue-600 text-blue-600"; renderizarPestanaPerfil();
         }
 
         function renderizarPestanaPerfil() {
-            const grid = document.getElementById('grid-perfil-contenido');
-            grid.innerHTML = ''; let anunciosMostrados = 0;
+            const grid = document.getElementById('grid-perfil-contenido'); grid.innerHTML = ''; let anunciosMostrados = 0;
             anunciosGlobales.forEach(anuncio => {
                 let mostrar = false, botonesCard = "";
                 if (pestanaPerfilActual === 'venta') {
                     if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado !== 'vendido') {
-                        mostrar = true;
-                        botonesCard = `<div class="flex gap-2 w-full mt-2"><button onclick="event.stopPropagation(); abrirEditor(${anuncio.id_anuncio})" class="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="event.stopPropagation(); confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
+                        mostrar = true; botonesCard = `<div class="flex gap-2 w-full mt-2"><button onclick="event.stopPropagation(); abrirEditor(${anuncio.id_anuncio})" class="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="event.stopPropagation(); confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
                     }
                 } else if (pestanaPerfilActual === 'favoritos') {
                     if (misFavoritos.includes(anuncio.id_anuncio) && anuncio.estado !== 'vendido') {
@@ -563,15 +539,13 @@
             let badgeFotosExtra = (anuncio.imagenes && anuncio.imagenes.length > 1) ? `<span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full"><i class="fa-solid fa-images mr-1"></i>+${anuncio.imagenes.length - 1}</span>` : "";
             let corazonHtml = ""; const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
             if (!esPerfil && usuarioActual && anuncio.id_usuario !== usuarioActual.id_usuario && anuncio.estado !== 'vendido' && !esAdmin) {
-                const esFav = misFavoritos.includes(anuncio.id_anuncio);
-                corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
+                const esFav = misFavoritos.includes(anuncio.id_anuncio); corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
             }
             let capaVendido = anuncio.estado === 'vendido' ? `<div class="absolute inset-0 bg-white/60 flex items-center justify-center z-20 backdrop-blur-[1px]"><span class="bg-black text-white font-black px-4 py-2 rounded-lg text-xl tracking-widest transform -rotate-12 border-2 border-white">VENDIDO</span></div>` : "";
             let footerHtml = esPerfil ? `<span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span> ${botonAccion}` : `<div class="mt-auto flex justify-between items-center pt-3 border-t"><span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span>${botonAccion}</div>`;
             return `<div onclick="verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-white rounded-xl border overflow-hidden hover:shadow-xl transition flex flex-col cursor-pointer group relative">${capaVendido}<div class="relative h-48 bg-blue-50 flex items-center justify-center border-b">${fondoHtml}<div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition"></div><span class="absolute top-2 left-2 bg-white text-xs font-bold px-2 py-1 rounded shadow text-gray-700 uppercase tracking-wider">${anuncio.categoria}</span>${corazonHtml} ${badgeFotosExtra}</div><div class="p-4 flex flex-col flex-1"><h3 class="font-bold text-gray-800 text-lg mb-1 truncate group-hover:text-blue-600 transition">${anuncio.titulo}</h3><p class="text-sm text-gray-500 mb-4 h-10 overflow-hidden line-clamp-2">${anuncio.descripcion}</p>${!esPerfil ? footerHtml : `<div class="mt-auto border-t pt-3 flex flex-col">${footerHtml}</div>`}</div></div>`;
         }
 
-        // --- DETALLES Y ACCIONES ---
         function verDetalleAnuncio(idAnuncio) {
             const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if(!anuncio) return;
             document.getElementById('detalle-categoria').innerText = anuncio.categoria; document.getElementById('detalle-titulo').innerText = anuncio.titulo; document.getElementById('detalle-precio').innerText = `€${anuncio.precio.toFixed(2)}`; document.getElementById('detalle-desc').innerText = anuncio.descripcion;
@@ -591,12 +565,11 @@
             } else if (esMio || esAdmin) {
                 let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Modificando como Administrador</p>` : "";
                 zonaBoton.innerHTML = `${badgeAdmin}<div class="flex gap-4"><button onclick="abrirEditor(${anuncio.id_anuncio})" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 border-2 border-red-100 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
-            } else {
-                zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
-            }
+            } else { zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`; }
             cambiarPantalla('pantalla-detalle');
         }
 
+        // --- SISTEMA DE LOGINS, SEGURIDAD Y PERFIL ---
         function abrirEditor(idAnuncio) {
             const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if(!anuncio) return;
             document.getElementById('edit-id').value = anuncio.id_anuncio; document.getElementById('edit-titulo').value = anuncio.titulo; document.getElementById('edit-desc').value = anuncio.descripcion; document.getElementById('edit-precio').value = anuncio.precio; document.getElementById('edit-cat').value = anuncio.categoria;
@@ -613,24 +586,14 @@
             } catch(e) { mostrarNotificacion("Error al conectar", "error"); }
         }
 
-        // SUSTITUIDO POR EL MODAL PERSONALIZADO
         function confirmarBorrarAnuncio(idAnuncio) {
-            mostrarConfirmacion(
-                "Borrar Anuncio",
-                "¿Seguro que quieres borrar este anuncio definitivamente? Esta acción no se puede deshacer.",
-                "Sí, eliminar",
-                "bg-red-600 hover:bg-red-700",
-                async () => {
-                    try { 
-                        const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' }); 
-                        if(res.ok) { 
-                            mostrarNotificacion("Anuncio borrado correctamente", "info"); 
-                            cargarDatosCentrales(); 
-                            cambiarPantalla('pantalla-tienda'); 
-                        } else { mostrarNotificacion("Error al borrar", "error"); } 
-                    } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
-                }
-            );
+            mostrarConfirmacion("Borrar Anuncio", "¿Seguro que quieres borrar este anuncio definitivamente?", "Sí, eliminar", "bg-red-600 hover:bg-red-700", async () => {
+                try { 
+                    const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' }); 
+                    if(res.ok) { mostrarNotificacion("Anuncio borrado", "info"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); } 
+                    else { mostrarNotificacion("Error al borrar", "error"); } 
+                } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
+            });
         }
 
         async function toggleFavorito(idAnuncio) {
@@ -645,53 +608,50 @@
         
         async function subirAnuncioReal() {
             if (!usuarioActual) { mostrarNotificacion("¡Inicia sesión para publicar!", "error"); cambiarPantalla('pantalla-login'); return; }
+            const titulo = document.getElementById('nuevo-titulo').value, desc = document.getElementById('nuevo-desc').value, precio = document.getElementById('nuevo-precio').value;
+            if(!titulo || !desc || !precio) return mostrarNotificacion("Rellena todos los campos obligatorios.", "error");
             
-            const titulo = document.getElementById('nuevo-titulo').value;
-            const desc = document.getElementById('nuevo-desc').value;
-            const precio = document.getElementById('nuevo-precio').value;
-            
-            if(!titulo || !desc || !precio) {
-                mostrarNotificacion("Rellena todos los campos obligatorios.", "error");
-                return;
-            }
-
             const inputImagenes = document.getElementById('nuevo-imagenes'); const arrayFotos = [];
             for(let i=0; i<inputImagenes.files.length; i++) arrayFotos.push(await leerArchivoComoBase64(inputImagenes.files[i]));
             const anuncio = { id_usuario: usuarioActual.id_usuario, titulo: titulo, descripcion: desc, precio: parseFloat(precio), categoria: document.getElementById('nuevo-cat').value, imagenes: arrayFotos };
-            
             try { 
                 const res = await fetch(`${API_BASE}/anuncios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(anuncio) }); 
                 if (res.ok) { 
                     mostrarNotificacion("¡Anuncio publicado!", "exito"); 
-                    
-                    // Limpiar campos después de publicar
-                    document.getElementById('nuevo-titulo').value = '';
-                    document.getElementById('nuevo-desc').value = '';
-                    document.getElementById('nuevo-precio').value = '';
-                    document.getElementById('preview-imagenes').innerHTML = '';
-                    
-                    cambiarPestanaPerfil('venta'); 
-                    cambiarPantalla('pantalla-perfil'); 
-                } else { 
-                    mostrarNotificacion("Moderación: " + (await res.json()).detail, "error"); 
-                } 
+                    document.getElementById('nuevo-titulo').value = ''; document.getElementById('nuevo-desc').value = ''; document.getElementById('nuevo-precio').value = ''; document.getElementById('preview-imagenes').innerHTML = '';
+                    cambiarPestanaPerfil('venta'); cambiarPantalla('pantalla-perfil'); 
+                } else { mostrarNotificacion("Moderación: " + (await res.json()).detail, "error"); } 
             } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
         }
 
+        // --- LA BARRERA DE SEGURIDAD PARA CORREOS ---
         async function intentarLogin() {
+            const emailForm = document.getElementById('email-login').value;
+            const passForm = document.getElementById('pass-login').value;
+
+            // Filtro estricto @campus.uan
+            if (!emailForm.endsWith(DOMINIO_UAN)) {
+                return mostrarNotificacion("Solo se permiten correos de la universidad (@campus.uan)", "error");
+            }
+
             try { 
-                const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('email-login').value, contrasena: document.getElementById('pass-login').value}) }); 
+                const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: emailForm, contrasena: passForm}) }); 
                 const data = await res.json(); 
-                if(res.ok) {
-                    mostrarNotificacion(`¡Hola, ${data.usuario}!`, "exito");
-                    iniciarSesionUI(data); 
-                } else { mostrarNotificacion(data.detail, "error"); } 
+                if(res.ok) { mostrarNotificacion(`¡Hola, ${data.usuario}!`, "exito"); iniciarSesionUI(data); } 
+                else { mostrarNotificacion(data.detail, "error"); } 
             } catch(e) { mostrarNotificacion("Error de conexión al servidor", "error"); }
         }
 
         async function intentarRegistro() {
             const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; 
-            if(!nom || !em || !pa) { mostrarNotificacion("Rellena todos los campos.", "error"); return; }
+            
+            if(!nom || !em || !pa) return mostrarNotificacion("Rellena todos los campos.", "error");
+
+            // Filtro estricto @campus.uan
+            if (!em.endsWith(DOMINIO_UAN)) {
+                return mostrarNotificacion("Debes registrarte con tu correo universitario oficial (@campus.uan)", "error");
+            }
+
             let foto = ""; if(document.getElementById('reg-foto').files.length > 0) foto = await leerArchivoComoBase64(document.getElementById('reg-foto').files[0]);
             try { 
                 const res = await fetch(`${API_BASE}/registro`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre: nom, email: em, contrasena: pa, foto_perfil: foto}) }); 
@@ -709,23 +669,10 @@
             cambiarPantalla('pantalla-tienda');
         }
 
-        // SUSTITUIDO POR EL MODAL PERSONALIZADO
         function confirmarCerrarSesion() { 
-            mostrarConfirmacion(
-                "Cerrar Sesión", 
-                "¿Seguro que quieres cerrar la sesión en este dispositivo?",
-                "Cerrar Sesión",
-                "bg-red-600 hover:bg-red-700",
-                () => {
-                    usuarioActual = null; 
-                    misFavoritos = []; 
-                    document.getElementById('contenedor-perfil').classList.add('hidden'); 
-                    document.getElementById('contenedor-perfil').classList.remove('flex'); 
-                    document.getElementById('btn-login').classList.remove('hidden'); 
-                    mostrarNotificacion("Sesión cerrada.", "info");
-                    cambiarPantalla('pantalla-tienda'); 
-                }
-            );
+            mostrarConfirmacion("Cerrar Sesión", "¿Seguro que quieres cerrar la sesión en este dispositivo?", "Cerrar Sesión", "bg-red-600 hover:bg-red-700", () => {
+                usuarioActual = null; misFavoritos = []; document.getElementById('contenedor-perfil').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('flex'); document.getElementById('btn-login').classList.remove('hidden'); mostrarNotificacion("Sesión cerrada.", "info"); cambiarPantalla('pantalla-tienda'); 
+            });
         }
     </script>
 </body>
