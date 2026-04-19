@@ -339,7 +339,7 @@
 
     <script>
         const API_BASE = "http://127.0.0.1:8000/api";
-        const DOMINIO_UAN = "@campus.uan"; // Variable de seguridad central
+        const DOMINIO_UAN = "@campus.uan"; 
         let usuarioActual = null; 
         let anunciosGlobales = []; 
         let misFavoritos = []; 
@@ -400,7 +400,6 @@
             else { cambiarPantalla('pantalla-publicar'); }
         }
 
-        // --- CHECKOUT BLINDADO CON REGEX ---
         function toggleLugarOtro() { const sel = document.getElementById('checkout-lugar'), inp = document.getElementById('checkout-lugar-otro'); if (sel.value === 'otro') inp.classList.remove('hidden'); else inp.classList.add('hidden'); }
         function cambiarMetodoPago(metodo) {
             const tabTarjeta = document.getElementById('tab-tarjeta'), tabBizum = document.getElementById('tab-bizum');
@@ -431,13 +430,11 @@
         async function procesarPagoFinal() {
             if (!articuloEnCheckout) return;
 
-            // 1. VALIDACIÓN DEL LUGAR
             const lugarSelector = document.getElementById('checkout-lugar').value;
             if(lugarSelector === 'otro' && document.getElementById('checkout-lugar-otro').value.trim() === '') {
                 return mostrarNotificacion("Por favor, especifica el lugar de entrega.", "error");
             }
 
-            // 2. VALIDACIONES DE PAGO
             const esTarjeta = document.getElementById('form-tarjeta').classList.contains('block');
             
             if (esTarjeta) {
@@ -447,28 +444,22 @@
                 const cvv = document.getElementById('pago-tarjeta-cvv').value.trim();
 
                 if (!titular) return mostrarNotificacion("El nombre del titular es obligatorio", "error");
-                // Regex: Exactamente 16 números
                 if (!/^\d{16}$/.test(numTarjeta)) return mostrarNotificacion("El número de tarjeta debe tener 16 dígitos", "error");
-                // Regex: Mes 01 al 12, barra, 2 dígitos de año
                 if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(caducidad)) return mostrarNotificacion("Fecha de caducidad inválida (Usa formato MM/AA)", "error");
-                // Regex: 3 o 4 números
                 if (!/^\d{3,4}$/.test(cvv)) return mostrarNotificacion("El CVV debe tener 3 o 4 dígitos", "error");
 
-                // Comprobación de que no esté caducada en el tiempo real
                 const [mes, anio] = caducidad.split('/');
                 const fechaCaducidad = new Date(`20${anio}`, parseInt(mes) - 1);
                 const hoy = new Date();
-                hoy.setDate(1); hoy.setHours(0,0,0,0); // Ajustamos a día 1 para no penalizar si caduca este mismo mes
+                hoy.setDate(1); hoy.setHours(0,0,0,0); 
                 
                 if (fechaCaducidad < hoy) return mostrarNotificacion("La tarjeta está caducada", "error");
 
             } else {
                 const telefono = document.getElementById('pago-bizum-tlf').value.replace(/\s/g, '');
-                // Regex: Exactamente 9 números
                 if (!/^\d{9}$/.test(telefono)) return mostrarNotificacion("El número de teléfono para Bizum debe tener 9 dígitos", "error");
             }
 
-            // 3. PROCESAMIENTO SI TODO ESTÁ OK
             const btnPagar = document.getElementById('btn-pagar');
             const textoOriginal = btnPagar.innerHTML;
             btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando...`;
@@ -476,11 +467,20 @@
 
             setTimeout(async () => {
                 try { 
-                    const res = await fetch(`${API_BASE}/comprar/${articuloEnCheckout.id_anuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
+                    // CAMBIO CLAVE AQUÍ: Enviamos el precio esperado
+                    const url = `${API_BASE}/comprar/${articuloEnCheckout.id_anuncio}?id_comprador=${usuarioActual.id_usuario}&precio_esperado=${articuloEnCheckout.precio}`;
+                    const res = await fetch(url, { method: 'PUT' });
+                    
                     if (res.ok) { 
                         mostrarNotificacion("¡Pago aceptado! Compra realizada con éxito.", "exito"); 
                         await cargarDatosCentrales(); 
                         cambiarPestanaPerfil('comprados'); cambiarPantalla('pantalla-perfil');
+                    } else {
+                        // SI FALLA LA CONDICIÓN DE CARRERA (Ej: Cambio de precio o borrado)
+                        const dataError = await res.json();
+                        mostrarNotificacion(dataError.detail, "error");
+                        await cargarDatosCentrales(); // Refrescamos todo
+                        cambiarPantalla('pantalla-tienda'); // Le sacamos de la pantalla de pago
                     }
                 } catch(e) { mostrarNotificacion("Error conectando con el servidor.", "error"); } 
                 finally { btnPagar.innerHTML = textoOriginal; btnPagar.disabled = false; articuloEnCheckout = null; }
@@ -539,7 +539,8 @@
             let badgeFotosExtra = (anuncio.imagenes && anuncio.imagenes.length > 1) ? `<span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full"><i class="fa-solid fa-images mr-1"></i>+${anuncio.imagenes.length - 1}</span>` : "";
             let corazonHtml = ""; const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
             if (!esPerfil && usuarioActual && anuncio.id_usuario !== usuarioActual.id_usuario && anuncio.estado !== 'vendido' && !esAdmin) {
-                const esFav = misFavoritos.includes(anuncio.id_anuncio); corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
+                const esFav = misFavoritos.includes(anuncio.id_anuncio);
+                corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
             }
             let capaVendido = anuncio.estado === 'vendido' ? `<div class="absolute inset-0 bg-white/60 flex items-center justify-center z-20 backdrop-blur-[1px]"><span class="bg-black text-white font-black px-4 py-2 rounded-lg text-xl tracking-widest transform -rotate-12 border-2 border-white">VENDIDO</span></div>` : "";
             let footerHtml = esPerfil ? `<span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span> ${botonAccion}` : `<div class="mt-auto flex justify-between items-center pt-3 border-t"><span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span>${botonAccion}</div>`;
@@ -565,11 +566,12 @@
             } else if (esMio || esAdmin) {
                 let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Modificando como Administrador</p>` : "";
                 zonaBoton.innerHTML = `${badgeAdmin}<div class="flex gap-4"><button onclick="abrirEditor(${anuncio.id_anuncio})" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 border-2 border-red-100 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
-            } else { zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`; }
+            } else {
+                zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
+            }
             cambiarPantalla('pantalla-detalle');
         }
 
-        // --- SISTEMA DE LOGINS, SEGURIDAD Y PERFIL ---
         function abrirEditor(idAnuncio) {
             const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if(!anuncio) return;
             document.getElementById('edit-id').value = anuncio.id_anuncio; document.getElementById('edit-titulo').value = anuncio.titulo; document.getElementById('edit-desc').value = anuncio.descripcion; document.getElementById('edit-precio').value = anuncio.precio; document.getElementById('edit-cat').value = anuncio.categoria;
@@ -587,13 +589,22 @@
         }
 
         function confirmarBorrarAnuncio(idAnuncio) {
-            mostrarConfirmacion("Borrar Anuncio", "¿Seguro que quieres borrar este anuncio definitivamente?", "Sí, eliminar", "bg-red-600 hover:bg-red-700", async () => {
-                try { 
-                    const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' }); 
-                    if(res.ok) { mostrarNotificacion("Anuncio borrado", "info"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); } 
-                    else { mostrarNotificacion("Error al borrar", "error"); } 
-                } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
-            });
+            mostrarConfirmacion(
+                "Borrar Anuncio",
+                "¿Seguro que quieres borrar este anuncio definitivamente? Esta acción no se puede deshacer.",
+                "Sí, eliminar",
+                "bg-red-600 hover:bg-red-700",
+                async () => {
+                    try { 
+                        const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' }); 
+                        if(res.ok) { 
+                            mostrarNotificacion("Anuncio borrado correctamente", "info"); 
+                            cargarDatosCentrales(); 
+                            cambiarPantalla('pantalla-tienda'); 
+                        } else { mostrarNotificacion("Error al borrar", "error"); } 
+                    } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
+                }
+            );
         }
 
         async function toggleFavorito(idAnuncio) {
@@ -608,28 +619,40 @@
         
         async function subirAnuncioReal() {
             if (!usuarioActual) { mostrarNotificacion("¡Inicia sesión para publicar!", "error"); cambiarPantalla('pantalla-login'); return; }
-            const titulo = document.getElementById('nuevo-titulo').value, desc = document.getElementById('nuevo-desc').value, precio = document.getElementById('nuevo-precio').value;
-            if(!titulo || !desc || !precio) return mostrarNotificacion("Rellena todos los campos obligatorios.", "error");
             
+            const titulo = document.getElementById('nuevo-titulo').value;
+            const desc = document.getElementById('nuevo-desc').value;
+            const precio = document.getElementById('nuevo-precio').value;
+            
+            if(!titulo || !desc || !precio) {
+                mostrarNotificacion("Rellena todos los campos obligatorios.", "error");
+                return;
+            }
+
             const inputImagenes = document.getElementById('nuevo-imagenes'); const arrayFotos = [];
             for(let i=0; i<inputImagenes.files.length; i++) arrayFotos.push(await leerArchivoComoBase64(inputImagenes.files[i]));
             const anuncio = { id_usuario: usuarioActual.id_usuario, titulo: titulo, descripcion: desc, precio: parseFloat(precio), categoria: document.getElementById('nuevo-cat').value, imagenes: arrayFotos };
+            
             try { 
                 const res = await fetch(`${API_BASE}/anuncios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(anuncio) }); 
                 if (res.ok) { 
                     mostrarNotificacion("¡Anuncio publicado!", "exito"); 
-                    document.getElementById('nuevo-titulo').value = ''; document.getElementById('nuevo-desc').value = ''; document.getElementById('nuevo-precio').value = ''; document.getElementById('preview-imagenes').innerHTML = '';
-                    cambiarPestanaPerfil('venta'); cambiarPantalla('pantalla-perfil'); 
-                } else { mostrarNotificacion("Moderación: " + (await res.json()).detail, "error"); } 
+                    document.getElementById('nuevo-titulo').value = '';
+                    document.getElementById('nuevo-desc').value = '';
+                    document.getElementById('nuevo-precio').value = '';
+                    document.getElementById('preview-imagenes').innerHTML = '';
+                    cambiarPestanaPerfil('venta'); 
+                    cambiarPantalla('pantalla-perfil'); 
+                } else { 
+                    mostrarNotificacion("Moderación: " + (await res.json()).detail, "error"); 
+                } 
             } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
         }
 
-        // --- LA BARRERA DE SEGURIDAD PARA CORREOS ---
         async function intentarLogin() {
             const emailForm = document.getElementById('email-login').value;
             const passForm = document.getElementById('pass-login').value;
 
-            // Filtro estricto @campus.uan
             if (!emailForm.endsWith(DOMINIO_UAN)) {
                 return mostrarNotificacion("Solo se permiten correos de la universidad (@campus.uan)", "error");
             }
@@ -637,17 +660,23 @@
             try { 
                 const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: emailForm, contrasena: passForm}) }); 
                 const data = await res.json(); 
-                if(res.ok) { mostrarNotificacion(`¡Hola, ${data.usuario}!`, "exito"); iniciarSesionUI(data); } 
-                else { mostrarNotificacion(data.detail, "error"); } 
+                if(res.ok) {
+                    mostrarNotificacion(`¡Hola, ${data.usuario}!`, "exito");
+                    iniciarSesionUI(data); 
+                } else { 
+                    mostrarNotificacion(data.detail, "error"); 
+                } 
             } catch(e) { mostrarNotificacion("Error de conexión al servidor", "error"); }
         }
 
         async function intentarRegistro() {
             const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; 
             
-            if(!nom || !em || !pa) return mostrarNotificacion("Rellena todos los campos.", "error");
+            if(!nom || !em || !pa) {
+                mostrarNotificacion("Rellena todos los campos.", "error");
+                return;
+            }
 
-            // Filtro estricto @campus.uan
             if (!em.endsWith(DOMINIO_UAN)) {
                 return mostrarNotificacion("Debes registrarte con tu correo universitario oficial (@campus.uan)", "error");
             }
@@ -656,8 +685,12 @@
             try { 
                 const res = await fetch(`${API_BASE}/registro`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre: nom, email: em, contrasena: pa, foto_perfil: foto}) }); 
                 const data = await res.json(); 
-                if(res.ok) { mostrarNotificacion("¡Cuenta creada con éxito!", "exito"); iniciarSesionUI(data); } 
-                else { mostrarNotificacion(data.detail, "error"); } 
+                if(res.ok) { 
+                    mostrarNotificacion("¡Cuenta creada con éxito!", "exito"); 
+                    iniciarSesionUI(data); 
+                } else { 
+                    mostrarNotificacion(data.detail, "error"); 
+                } 
             } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
         }
 
@@ -670,9 +703,21 @@
         }
 
         function confirmarCerrarSesion() { 
-            mostrarConfirmacion("Cerrar Sesión", "¿Seguro que quieres cerrar la sesión en este dispositivo?", "Cerrar Sesión", "bg-red-600 hover:bg-red-700", () => {
-                usuarioActual = null; misFavoritos = []; document.getElementById('contenedor-perfil').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('flex'); document.getElementById('btn-login').classList.remove('hidden'); mostrarNotificacion("Sesión cerrada.", "info"); cambiarPantalla('pantalla-tienda'); 
-            });
+            mostrarConfirmacion(
+                "Cerrar Sesión", 
+                "¿Seguro que quieres cerrar la sesión en este dispositivo?",
+                "Cerrar Sesión",
+                "bg-red-600 hover:bg-red-700",
+                () => {
+                    usuarioActual = null; 
+                    misFavoritos = []; 
+                    document.getElementById('contenedor-perfil').classList.add('hidden'); 
+                    document.getElementById('contenedor-perfil').classList.remove('flex'); 
+                    document.getElementById('btn-login').classList.remove('hidden'); 
+                    mostrarNotificacion("Sesión cerrada.", "info");
+                    cambiarPantalla('pantalla-tienda'); 
+                }
+            );
         }
     </script>
 </body>

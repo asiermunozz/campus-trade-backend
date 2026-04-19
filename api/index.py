@@ -5,7 +5,7 @@ import json
 from api.moderacion import validar_anuncio
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Campus Trade API", version="5.0")
+app = FastAPI(title="Campus Trade API", version="6.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,7 +94,6 @@ def obtener_anuncios():
     conexion.close()
     return anuncios
 
-# --- RUTA MODIFICADA: EDITAR (CON PODER DE ADMIN) ---
 @app.put("/api/anuncios/{id_anuncio}")
 def editar_anuncio(id_anuncio: int, datos: EditarAnuncio):
     resultado_filtro = validar_anuncio(datos.titulo, datos.descripcion, datos.precio, datos.categoria)
@@ -103,7 +102,6 @@ def editar_anuncio(id_anuncio: int, datos: EditarAnuncio):
     conexion = sqlite3.connect("campustrade.db")
     cursor = conexion.cursor()
     
-    # Comprobar si el usuario es Admin
     es_admin = False
     if datos.id_usuario == 1: 
         es_admin = True
@@ -112,7 +110,6 @@ def editar_anuncio(id_anuncio: int, datos: EditarAnuncio):
         u = cursor.fetchone()
         if u and u[0] == 'moderador': es_admin = True
 
-    # Si es admin, actualiza sin mirar de quién es el anuncio
     if es_admin:
         cursor.execute('''UPDATE anuncios SET titulo = ?, descripcion = ?, precio = ?, categoria = ? WHERE id_anuncio = ?''',
                        (datos.titulo, datos.descripcion, datos.precio, datos.categoria, id_anuncio))
@@ -126,13 +123,11 @@ def editar_anuncio(id_anuncio: int, datos: EditarAnuncio):
     if cambios == 0: raise HTTPException(status_code=403, detail="No tienes permiso para editar este anuncio")
     return {"status": "éxito"}
 
-# --- RUTA MODIFICADA: BORRAR (CON PODER DE ADMIN) ---
 @app.delete("/api/anuncios/{id_anuncio}")
 def borrar_anuncio(id_anuncio: int, id_usuario: int):
     conexion = sqlite3.connect("campustrade.db")
     cursor = conexion.cursor()
     
-    # Comprobar si el usuario es Admin
     es_admin = False
     if id_usuario == 1:
         es_admin = True
@@ -141,7 +136,6 @@ def borrar_anuncio(id_anuncio: int, id_usuario: int):
         u = cursor.fetchone()
         if u and u[0] == 'moderador': es_admin = True
 
-    # Si es admin, borra sin hacer preguntas
     if es_admin:
         cursor.execute("DELETE FROM anuncios WHERE id_anuncio = ?", (id_anuncio,))
     else:
@@ -153,15 +147,37 @@ def borrar_anuncio(id_anuncio: int, id_usuario: int):
     if cambios == 0: raise HTTPException(status_code=403, detail="No tienes permiso para borrar este anuncio")
     return {"status": "éxito"}
 
+# --- RUTA MODIFICADA: COMPRA SEGURA Y CONTROL DE CONCURRENCIA ---
 @app.put("/api/comprar/{id_anuncio}")
-def comprar_anuncio(id_anuncio: int, id_comprador: int = 0):
+def comprar_anuncio(id_anuncio: int, id_comprador: int = 0, precio_esperado: float = None):
     conexion = sqlite3.connect("campustrade.db")
+    conexion.row_factory = sqlite3.Row
     cursor = conexion.cursor()
+    
+    # 1. Buscamos el anuncio justo antes de comprar
+    cursor.execute("SELECT * FROM anuncios WHERE id_anuncio = ?", (id_anuncio,))
+    anuncio = cursor.fetchone()
+    
+    # ¿Lo acaba de borrar el dueño o el admin?
+    if not anuncio:
+        conexion.close()
+        raise HTTPException(status_code=404, detail="Operación cancelada: El anuncio acaba de ser eliminado.")
+        
+    # ¿Se te acaba de adelantar otro comprador?
+    if anuncio["estado"] == "vendido":
+        conexion.close()
+        raise HTTPException(status_code=400, detail="¡Lo sentimos! Alguien se te acaba de adelantar y lo ha comprado.")
+        
+    # ¿El dueño ha cambiado el precio mientras rellenabas tu tarjeta?
+    if precio_esperado is not None and float(anuncio["precio"]) != float(precio_esperado):
+        conexion.close()
+        raise HTTPException(status_code=409, detail=f"Operación cancelada: El vendedor acaba de cambiar el precio a {anuncio['precio']}€.")
+        
+    # Si pasa todas las pruebas, confirmamos la compra
     cursor.execute("UPDATE anuncios SET estado = 'vendido', id_comprador = ? WHERE id_anuncio = ?", (id_comprador, id_anuncio))
     conexion.commit()
-    cambios = cursor.rowcount
     conexion.close()
-    if cambios == 0: raise HTTPException(status_code=404, detail="Anuncio no encontrado")
+    
     return {"status": "éxito"}
 
 @app.get("/api/favoritos/{id_usuario}")
@@ -198,7 +214,6 @@ def hacer_login(cred: Credenciales):
     conexion.close()
     if usuario: return {"status": "ok", "id_usuario": usuario["id_usuario"], "rol": usuario["rol"], "usuario": usuario["nombre"], "foto_perfil": usuario["foto_perfil"]}
     
-    # ADMIN POR DEFECTO
     if cred.email == "admin@campus.uan" and cred.contrasena == "admin123": 
         return {"status": "ok", "id_usuario": 1, "rol": "moderador", "usuario": "Admin", "foto_perfil": ""}
         
