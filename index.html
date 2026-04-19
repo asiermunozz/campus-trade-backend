@@ -6,8 +6,27 @@
     <title>CampusTrade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans relative">
+
+    <div id="modal-confirmacion" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 p-6 transform scale-95 transition-transform duration-200" id="modal-confirmacion-content">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl shrink-0" id="modal-conf-icono">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 id="modal-conf-titulo" class="text-xl font-bold text-gray-900 leading-tight"></h3>
+            </div>
+            <p id="modal-conf-mensaje" class="text-gray-600 mb-6 text-sm"></p>
+            <div class="flex justify-end gap-3">
+                <button onclick="cerrarModalConfirmacion()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-lg transition shadow-sm">Cancelar</button>
+                <button id="modal-conf-btn-aceptar" onclick="ejecutarAccionConfirmacion()" class="px-4 py-2 text-white font-bold rounded-lg transition shadow-md"></button>
+            </div>
+        </div>
+    </div>
 
     <nav class="bg-white border-b py-4 px-6 flex justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center gap-2 cursor-pointer" onclick="cambiarPantalla('pantalla-tienda')">
@@ -15,7 +34,7 @@
             <span class="text-xl font-bold text-gray-900">CampusTrade</span>
         </div>
         <div class="flex items-center gap-4 text-gray-600">
-            <button onclick="cambiarPantalla('pantalla-publicar')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
+            <button onclick="intentarPublicar()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">
                 + Vender
             </button>
             <button id="btn-login" onclick="cambiarPantalla('pantalla-login')" class="hover:text-blue-600 transition ml-2 font-bold">
@@ -28,7 +47,7 @@
                     </div>
                     <span id="texto-nombre" class="font-bold"></span>
                 </button>
-                <button onclick="cerrarSesion()" class="text-gray-400 hover:text-red-600 transition" title="Cerrar sesión">
+                <button onclick="confirmarCerrarSesion()" class="text-gray-400 hover:text-red-600 transition" title="Cerrar sesión">
                     <i class="fa-solid fa-arrow-right-from-bracket text-xl"></i>
                 </button>
             </div>
@@ -92,7 +111,6 @@
 
         <div class="flex flex-col lg:flex-row gap-8">
             <div class="w-full lg:w-2/3 space-y-6">
-                
                 <div class="bg-white p-6 rounded-2xl border shadow-sm">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-location-dot text-blue-600"></i> Opciones de Entrega</h3>
                     <div class="space-y-3">
@@ -103,27 +121,28 @@
                                 <p class="text-sm text-gray-500">Gratis. Queda con el vendedor en la uni.</p>
                             </div>
                         </label>
-                        <select class="w-full p-3 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 mt-2">
-                            <option>Punto de encuentro: Cafetería Central</option>
-                            <option>Punto de encuentro: Biblioteca</option>
-                            <option>Punto de encuentro: Entrada Facultad</option>
+                        <select id="checkout-lugar" onchange="toggleLugarOtro()" class="w-full p-3 bg-white border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 mt-2 font-semibold">
+                            <option value="cafeteria">Punto de encuentro: Cafetería Central</option>
+                            <option value="biblioteca">Punto de encuentro: Biblioteca</option>
+                            <option value="facultad">Punto de encuentro: Entrada Facultad</option>
+                            <option value="otro">Otro lugar...</option>
                         </select>
+                        <input type="text" id="checkout-lugar-otro" placeholder="Ej: Puerta principal a las 10:30..." class="hidden w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 mt-2">
                     </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl border shadow-sm">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-credit-card text-blue-600"></i> Método de Pago</h3>
-                    
                     <div class="flex gap-4 mb-6">
-                        <button class="flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition">
-                            <i class="fa-regular fa-credit-card"></i> Tarjeta
+                        <button id="tab-tarjeta" onclick="cambiarMetodoPago('tarjeta')" class="flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition flex justify-center items-center gap-2">
+                            <i class="fa-regular fa-credit-card text-xl"></i> Tarjeta
                         </button>
-                        <button class="flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition">
-                            <i class="fa-solid fa-mobile-screen"></i> Bizum
+                        <button id="tab-bizum" onclick="cambiarMetodoPago('bizum')" class="flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-mobile-screen text-xl"></i> Bizum
                         </button>
                     </div>
 
-                    <div class="space-y-4">
+                    <div id="form-tarjeta" class="space-y-4 block">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Titular de la tarjeta</label>
                             <input type="text" id="pago-nombre" placeholder="Nombre completo" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
@@ -146,13 +165,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="form-bizum" class="space-y-4 hidden">
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3 text-blue-800">
+                            <i class="fa-solid fa-circle-info text-xl mt-0.5"></i>
+                            <p class="text-sm">Te enviaremos una solicitud de Bizum al número que introduzcas a continuación. Autoriza el pago en la app de tu banco para finalizar la compra.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Tu número de teléfono móvil</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3.5 text-gray-500 font-bold border-r pr-3">+34</span>
+                                <input type="tel" placeholder="600 000 000" class="w-full p-3 pl-16 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-lg tracking-wider">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="w-full lg:w-1/3">
                 <div class="bg-white p-6 rounded-2xl border shadow-sm sticky top-24">
                     <h3 class="text-xl font-bold mb-4">Resumen</h3>
-                    
                     <div class="flex gap-4 mb-6 pb-6 border-b">
                         <div id="checkout-foto" class="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden border shrink-0 flex items-center justify-center"></div>
                         <div>
@@ -160,31 +192,19 @@
                             <p class="text-sm text-gray-500 mt-1" id="checkout-vendedor"></p>
                         </div>
                     </div>
-
                     <div class="space-y-3 mb-6 text-sm text-gray-600">
-                        <div class="flex justify-between">
-                            <span>Subtotal artículo</span>
-                            <span id="checkout-subtotal" class="font-bold text-gray-800"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Protección al comprador (Seguro)</span>
-                            <span class="font-bold text-gray-800">€0.99</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Gastos de envío (Campus)</span>
-                            <span class="font-bold text-green-600">Gratis</span>
-                        </div>
+                        <div class="flex justify-between"><span>Subtotal artículo</span><span id="checkout-subtotal" class="font-bold text-gray-800"></span></div>
+                        <div class="flex justify-between"><span>Protección al comprador (Seguro)</span><span class="font-bold text-gray-800">€0.99</span></div>
+                        <div class="flex justify-between"><span>Gastos de envío (Campus)</span><span class="font-bold text-green-600">Gratis</span></div>
                     </div>
-
                     <div class="flex justify-between items-end pt-4 border-t mb-6">
                         <span class="font-bold text-gray-800">Total a pagar</span>
                         <span id="checkout-total" class="text-3xl font-black text-gray-900"></span>
                     </div>
-
                     <button onclick="procesarPagoFinal()" id="btn-pagar" class="w-full bg-black text-white text-lg font-bold py-4 rounded-xl hover:bg-gray-800 transition shadow-lg flex justify-center items-center gap-2">
                         <i class="fa-solid fa-lock"></i> Pagar de forma segura
                     </button>
-                    <p class="text-center text-xs text-gray-400 mt-4"><i class="fa-solid fa-shield-halved"></i> Tus datos están cifrados y seguros. Esto es un entorno de pruebas.</p>
+                    <p class="text-center text-xs text-gray-400 mt-4"><i class="fa-solid fa-shield-halved"></i> Tus datos están cifrados y seguros. Entorno de pruebas.</p>
                 </div>
             </div>
         </div>
@@ -201,7 +221,7 @@
                     <p class="text-gray-500">Tu espacio personal en CampusTrade</p>
                 </div>
             </div>
-            <button onclick="cerrarSesion()" class="border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg font-bold transition">Cerrar Sesión</button>
+            <button onclick="confirmarCerrarSesion()" class="border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg font-bold transition">Cerrar Sesión</button>
         </div>
 
         <div class="flex gap-6 border-b mb-8 overflow-x-auto">
@@ -256,10 +276,8 @@
             <div class="space-y-4">
                 <label class="block text-sm font-bold text-gray-700">Título</label>
                 <input id="edit-titulo" type="text" class="w-full p-3 bg-gray-50 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                
                 <label class="block text-sm font-bold text-gray-700 mt-2">Descripción</label>
                 <textarea id="edit-desc" class="w-full p-3 bg-gray-50 border rounded-lg h-24 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700">Precio (€)</label>
@@ -326,8 +344,70 @@
         let anunciosGlobales = []; 
         let misFavoritos = []; 
         let pestanaPerfilActual = 'venta';
-        let articuloEnCheckout = null; // NUEVO: Guarda el artículo que estamos a punto de comprar
+        let articuloEnCheckout = null;
 
+        // --- SISTEMA DE NOTIFICACIONES TOASTIFY ---
+        function mostrarNotificacion(mensaje, tipo = "info") {
+            let bgColor = "linear-gradient(to right, #00b09b, #96c93d)"; // Verde 
+            if (tipo === "error") bgColor = "linear-gradient(to right, #ff5f6d, #ffc371)"; // Rojo
+            else if (tipo === "info") bgColor = "linear-gradient(to right, #2193b0, #6dd5ed)"; // Azul
+            
+            Toastify({
+                text: mensaje,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                style: { background: bgColor, borderRadius: "8px", fontWeight: "bold", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" },
+                stopOnFocus: true
+            }).showToast();
+        }
+
+        // --- NUEVO: SISTEMA DE MODAL DE CONFIRMACIÓN ---
+        let accionConfirmacionPendiente = null;
+
+        function mostrarConfirmacion(titulo, mensaje, textoBoton, colorBotonClass, accionAceptar) {
+            document.getElementById('modal-conf-titulo').innerText = titulo;
+            document.getElementById('modal-conf-mensaje').innerText = mensaje;
+            
+            const btnAceptar = document.getElementById('modal-conf-btn-aceptar');
+            btnAceptar.innerText = textoBoton;
+            btnAceptar.className = `px-4 py-2 text-white font-bold rounded-lg transition shadow-md ${colorBotonClass}`;
+            
+            accionConfirmacionPendiente = accionAceptar;
+            
+            const modal = document.getElementById('modal-confirmacion');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Pequeño timeout para que se active la animación de escala de Tailwind
+            setTimeout(() => {
+                document.getElementById('modal-confirmacion-content').classList.remove('scale-95');
+                document.getElementById('modal-confirmacion-content').classList.add('scale-100');
+            }, 10);
+        }
+
+        function cerrarModalConfirmacion() {
+            const modal = document.getElementById('modal-confirmacion');
+            document.getElementById('modal-confirmacion-content').classList.remove('scale-100');
+            document.getElementById('modal-confirmacion-content').classList.add('scale-95');
+            
+            // Esperamos que termine la animación para ocultarlo
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                accionConfirmacionPendiente = null;
+            }, 200);
+        }
+
+        function ejecutarAccionConfirmacion() {
+            if (accionConfirmacionPendiente) {
+                accionConfirmacionPendiente();
+            }
+            cerrarModalConfirmacion();
+        }
+
+
+        // --- CARGA Y NAVEGACIÓN ---
         window.onload = cargarDatosCentrales;
 
         async function cargarDatosCentrales() {
@@ -352,281 +432,209 @@
             if(id === 'pantalla-tienda' || id === 'pantalla-perfil') cargarDatosCentrales();
         }
 
+        function intentarPublicar() {
+            if (!usuarioActual) {
+                mostrarNotificacion("¡Inicia sesión para publicar un anuncio!", "error");
+                cambiarPantalla('pantalla-login');
+            } else {
+                cambiarPantalla('pantalla-publicar');
+            }
+        }
+
+        // --- CHECKOUT ---
+        function toggleLugarOtro() {
+            const select = document.getElementById('checkout-lugar');
+            const inputOtro = document.getElementById('checkout-lugar-otro');
+            if (select.value === 'otro') { inputOtro.classList.remove('hidden'); } else { inputOtro.classList.add('hidden'); }
+        }
+
+        function cambiarMetodoPago(metodo) {
+            const tabTarjeta = document.getElementById('tab-tarjeta'), tabBizum = document.getElementById('tab-bizum');
+            const formTarjeta = document.getElementById('form-tarjeta'), formBizum = document.getElementById('form-bizum');
+
+            if (metodo === 'tarjeta') {
+                tabTarjeta.className = "flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition flex justify-center items-center gap-2";
+                tabBizum.className = "flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2";
+                formTarjeta.classList.remove('hidden'); formTarjeta.classList.add('block');
+                formBizum.classList.remove('block'); formBizum.classList.add('hidden');
+            } else {
+                tabBizum.className = "flex-1 py-3 border-2 border-blue-600 bg-blue-50 text-blue-700 font-bold rounded-xl transition flex justify-center items-center gap-2";
+                tabTarjeta.className = "flex-1 py-3 border-2 border-gray-200 text-gray-500 font-bold rounded-xl hover:bg-gray-50 transition flex justify-center items-center gap-2";
+                formBizum.classList.remove('hidden'); formBizum.classList.add('block');
+                formTarjeta.classList.remove('block'); formTarjeta.classList.add('hidden');
+            }
+        }
+
+        function iniciarCheckout(idAnuncio) {
+            if (!usuarioActual) { mostrarNotificacion("¡Para comprar necesitas iniciar sesión primero!", "error"); cambiarPantalla('pantalla-login'); return; }
+            articuloEnCheckout = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
+            if (!articuloEnCheckout) return;
+
+            document.getElementById('checkout-titulo').innerText = articuloEnCheckout.titulo;
+            document.getElementById('checkout-vendedor').innerText = `Vendido por: ${articuloEnCheckout.vendedor_nombre}`;
+            document.getElementById('checkout-subtotal').innerText = `€${articuloEnCheckout.precio.toFixed(2)}`;
+            const total = articuloEnCheckout.precio + 0.99; 
+            document.getElementById('checkout-total').innerText = `€${total.toFixed(2)}`;
+
+            if (articuloEnCheckout.imagenes && articuloEnCheckout.imagenes.length > 0) {
+                document.getElementById('checkout-foto').innerHTML = `<img src="${articuloEnCheckout.imagenes[0]}" class="w-full h-full object-cover">`;
+            } else { document.getElementById('checkout-foto').innerHTML = `<i class="fa-solid fa-box text-3xl text-gray-300"></i>`; }
+
+            document.getElementById('pago-nombre').value = usuarioActual.usuario;
+            document.getElementById('checkout-lugar').value = 'cafeteria';
+            document.getElementById('checkout-lugar-otro').classList.add('hidden');
+            cambiarMetodoPago('tarjeta');
+            cambiarPantalla('pantalla-checkout');
+        }
+
+        async function procesarPagoFinal() {
+            if (!articuloEnCheckout) return;
+            const btnPagar = document.getElementById('btn-pagar');
+            const textoOriginal = btnPagar.innerHTML;
+            btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando pago...`;
+            btnPagar.disabled = true;
+
+            setTimeout(async () => {
+                try { 
+                    const res = await fetch(`${API_BASE}/comprar/${articuloEnCheckout.id_anuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
+                    if (res.ok) { 
+                        mostrarNotificacion("¡Pago aceptado! Compra realizada con éxito.", "exito"); 
+                        await cargarDatosCentrales(); 
+                        cambiarPestanaPerfil('comprados');
+                        cambiarPantalla('pantalla-perfil');
+                    }
+                } catch(e) { mostrarNotificacion("Error conectando con el servidor.", "error"); } 
+                finally { btnPagar.innerHTML = textoOriginal; btnPagar.disabled = false; articuloEnCheckout = null; }
+            }, 1500);
+        }
+
+        // --- PERFIL Y TIENDA ---
         function cambiarPestanaPerfil(pestana) {
             pestanaPerfilActual = pestana;
-            ['venta', 'favoritos', 'comprados', 'vendidos'].forEach(t => {
-                document.getElementById(`tab-${t}`).className = "pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent";
-            });
+            ['venta', 'favoritos', 'comprados', 'vendidos'].forEach(t => { document.getElementById(`tab-${t}`).className = "pb-3 border-b-2 font-bold transition text-gray-500 hover:text-gray-800 border-transparent"; });
             document.getElementById(`tab-${pestana}`).className = "pb-3 border-b-2 font-bold transition border-blue-600 text-blue-600";
             renderizarPestanaPerfil();
         }
 
         function renderizarPestanaPerfil() {
             const grid = document.getElementById('grid-perfil-contenido');
-            grid.innerHTML = '';
-            let anunciosMostrados = 0;
-
+            grid.innerHTML = ''; let anunciosMostrados = 0;
             anunciosGlobales.forEach(anuncio => {
-                let mostrar = false;
-                let botonesCard = "";
-
+                let mostrar = false, botonesCard = "";
                 if (pestanaPerfilActual === 'venta') {
                     if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado !== 'vendido') {
                         mostrar = true;
-                        botonesCard = `
-                            <div class="flex gap-2 w-full mt-2">
-                                <button onclick="event.stopPropagation(); abrirEditor(${anuncio.id_anuncio})" class="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-pen"></i> Editar</button>
-                                <button onclick="event.stopPropagation(); borrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-trash"></i> Borrar</button>
-                            </div>
-                        `;
+                        botonesCard = `<div class="flex gap-2 w-full mt-2"><button onclick="event.stopPropagation(); abrirEditor(${anuncio.id_anuncio})" class="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="event.stopPropagation(); confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 text-red-600 hover:bg-red-100 py-1.5 rounded-lg text-sm font-bold transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
                     }
                 } else if (pestanaPerfilActual === 'favoritos') {
                     if (misFavoritos.includes(anuncio.id_anuncio) && anuncio.estado !== 'vendido') {
-                        mostrar = true;
-                        botonesCard = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm mt-2 hover:bg-green-700">Comprar</button>`;
+                        mostrar = true; botonesCard = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white py-1.5 rounded-lg text-sm font-bold shadow-sm mt-2 hover:bg-green-700">Comprar</button>`;
                     }
                 } else if (pestanaPerfilActual === 'comprados') {
-                    if (anuncio.id_comprador === usuarioActual.id_usuario) {
-                        mostrar = true;
-                        botonesCard = `<span class="text-sm text-green-600 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-check-circle"></i> Tuyo</span>`;
-                    }
+                    if (anuncio.id_comprador === usuarioActual.id_usuario) { mostrar = true; botonesCard = `<span class="text-sm text-green-600 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-check-circle"></i> Tuyo</span>`; }
                 } else if (pestanaPerfilActual === 'vendidos') {
-                    if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado === 'vendido') {
-                        mostrar = true;
-                        botonesCard = `<span class="text-sm text-gray-500 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-handshake"></i> Entregado</span>`;
-                    }
+                    if (anuncio.id_usuario === usuarioActual.id_usuario && anuncio.estado === 'vendido') { mostrar = true; botonesCard = `<span class="text-sm text-gray-500 font-bold w-full text-center mt-2 block"><i class="fa-solid fa-handshake"></i> Entregado</span>`; }
                 }
-
-                if (mostrar) {
-                    anunciosMostrados++;
-                    grid.innerHTML += generarTarjetaHTML(anuncio, botonesCard, true); 
-                }
+                if (mostrar) { anunciosMostrados++; grid.innerHTML += generarTarjetaHTML(anuncio, botonesCard, true); }
             });
-
             if (anunciosMostrados === 0) grid.innerHTML = `<p class="text-gray-500 col-span-full py-10">No hay artículos en esta sección.</p>`;
         }
 
         function aplicarFiltrosTienda() {
-            const txt = document.getElementById('filtro-texto').value.toLowerCase();
-            const cat = document.getElementById('filtro-categoria').value;
-            const grid = document.getElementById('grid-productos-tienda');
-            grid.innerHTML = ''; 
-            let count = 0;
-
+            const txt = document.getElementById('filtro-texto').value.toLowerCase(), cat = document.getElementById('filtro-categoria').value, grid = document.getElementById('grid-productos-tienda');
+            grid.innerHTML = ''; let count = 0;
             anunciosGlobales.forEach(anuncio => {
                 if(anuncio.estado === 'vendido') return;
-                if ((anuncio.titulo.toLowerCase().includes(txt) || anuncio.descripcion.toLowerCase().includes(txt)) &&
-                    (cat === "Todas" || anuncio.categoria === cat)) {
+                if ((anuncio.titulo.toLowerCase().includes(txt) || anuncio.descripcion.toLowerCase().includes(txt)) && (cat === "Todas" || anuncio.categoria === cat)) {
                     count++;
-                    
-                    const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario);
-                    const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
-                    
+                    const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario), esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
                     let btn = "";
-                    if (esMio) {
-                        btn = `<span class="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded border">Es tuyo</span>`;
-                    } else if (esAdmin) {
-                        btn = `<button onclick="event.stopPropagation(); verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-200 transition shadow-sm border border-red-200"><i class="fa-solid fa-shield-halved"></i> Gestionar</button>`;
-                    } else {
-                        // CAMBIO CLAVE: Ahora llama a iniciarCheckout en vez de comprar directamente
-                        btn = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-md">Comprar</button>`;
-                    }
-
+                    if (esMio) btn = `<span class="text-sm font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded border">Es tuyo</span>`;
+                    else if (esAdmin) btn = `<button onclick="event.stopPropagation(); verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-200 transition shadow-sm border border-red-200"><i class="fa-solid fa-shield-halved"></i> Gestionar</button>`;
+                    else btn = `<button onclick="event.stopPropagation(); iniciarCheckout(${anuncio.id_anuncio})" class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-green-700 transition shadow-md">Comprar</button>`;
                     grid.innerHTML += generarTarjetaHTML(anuncio, btn, false);
                 }
             });
-
             if (count === 0) grid.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-gray-500 font-bold text-xl">Ningún anuncio coincide con tu búsqueda.</p></div>`;
         }
 
         function generarTarjetaHTML(anuncio, botonAccion, esPerfil) {
             let fondoHtml = anuncio.imagenes && anuncio.imagenes.length > 0 ? `<img src="${anuncio.imagenes[0]}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-camera text-4xl text-blue-200"></i>`;
             let badgeFotosExtra = (anuncio.imagenes && anuncio.imagenes.length > 1) ? `<span class="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full"><i class="fa-solid fa-images mr-1"></i>+${anuncio.imagenes.length - 1}</span>` : "";
-            
-            let corazonHtml = "";
-            const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
+            let corazonHtml = ""; const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
             if (!esPerfil && usuarioActual && anuncio.id_usuario !== usuarioActual.id_usuario && anuncio.estado !== 'vendido' && !esAdmin) {
                 const esFav = misFavoritos.includes(anuncio.id_anuncio);
                 corazonHtml = `<button onclick="event.stopPropagation(); toggleFavorito(${anuncio.id_anuncio})" class="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow text-lg transition z-10"><i class="${esFav ? 'fa-solid text-red-500' : 'fa-regular text-gray-400'} fa-heart"></i></button>`;
             }
-
             let capaVendido = anuncio.estado === 'vendido' ? `<div class="absolute inset-0 bg-white/60 flex items-center justify-center z-20 backdrop-blur-[1px]"><span class="bg-black text-white font-black px-4 py-2 rounded-lg text-xl tracking-widest transform -rotate-12 border-2 border-white">VENDIDO</span></div>` : "";
-
-            let footerHtml = esPerfil 
-                ? `<span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span> ${botonAccion}`
-                : `<div class="mt-auto flex justify-between items-center pt-3 border-t"><span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span>${botonAccion}</div>`;
-
-            return `
-                <div onclick="verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-white rounded-xl border overflow-hidden hover:shadow-xl transition flex flex-col cursor-pointer group relative">
-                    ${capaVendido}
-                    <div class="relative h-48 bg-blue-50 flex items-center justify-center border-b">
-                        ${fondoHtml}
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition"></div>
-                        <span class="absolute top-2 left-2 bg-white text-xs font-bold px-2 py-1 rounded shadow text-gray-700 uppercase tracking-wider">${anuncio.categoria}</span>
-                        ${corazonHtml} ${badgeFotosExtra}
-                    </div>
-                    <div class="p-4 flex flex-col flex-1">
-                        <h3 class="font-bold text-gray-800 text-lg mb-1 truncate group-hover:text-blue-600 transition">${anuncio.titulo}</h3>
-                        <p class="text-sm text-gray-500 mb-4 h-10 overflow-hidden line-clamp-2">${anuncio.descripcion}</p>
-                        ${!esPerfil ? footerHtml : `<div class="mt-auto border-t pt-3 flex flex-col">${footerHtml}</div>`}
-                    </div>
-                </div>
-            `;
+            let footerHtml = esPerfil ? `<span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span> ${botonAccion}` : `<div class="mt-auto flex justify-between items-center pt-3 border-t"><span class="font-extrabold text-xl ${anuncio.estado==='vendido'?'text-gray-400 line-through':'text-gray-900'}">€${anuncio.precio.toFixed(2)}</span>${botonAccion}</div>`;
+            return `<div onclick="verDetalleAnuncio(${anuncio.id_anuncio})" class="bg-white rounded-xl border overflow-hidden hover:shadow-xl transition flex flex-col cursor-pointer group relative">${capaVendido}<div class="relative h-48 bg-blue-50 flex items-center justify-center border-b">${fondoHtml}<div class="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition"></div><span class="absolute top-2 left-2 bg-white text-xs font-bold px-2 py-1 rounded shadow text-gray-700 uppercase tracking-wider">${anuncio.categoria}</span>${corazonHtml} ${badgeFotosExtra}</div><div class="p-4 flex flex-col flex-1"><h3 class="font-bold text-gray-800 text-lg mb-1 truncate group-hover:text-blue-600 transition">${anuncio.titulo}</h3><p class="text-sm text-gray-500 mb-4 h-10 overflow-hidden line-clamp-2">${anuncio.descripcion}</p>${!esPerfil ? footerHtml : `<div class="mt-auto border-t pt-3 flex flex-col">${footerHtml}</div>`}</div></div>`;
         }
 
+        // --- DETALLES Y ACCIONES ---
         function verDetalleAnuncio(idAnuncio) {
-            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
-            if(!anuncio) return;
-            
-            document.getElementById('detalle-categoria').innerText = anuncio.categoria;
-            document.getElementById('detalle-titulo').innerText = anuncio.titulo;
-            document.getElementById('detalle-precio').innerText = `€${anuncio.precio.toFixed(2)}`;
-            document.getElementById('detalle-desc').innerText = anuncio.descripcion;
-
+            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if(!anuncio) return;
+            document.getElementById('detalle-categoria').innerText = anuncio.categoria; document.getElementById('detalle-titulo').innerText = anuncio.titulo; document.getElementById('detalle-precio').innerText = `€${anuncio.precio.toFixed(2)}`; document.getElementById('detalle-desc').innerText = anuncio.descripcion;
             const avatarHtml = anuncio.vendedor_foto ? `<img src="${anuncio.vendedor_foto}" class="w-12 h-12 rounded-full object-cover shadow-sm">` : `<div class="w-12 h-12 bg-blue-200 text-blue-600 rounded-full flex items-center justify-center text-lg"><i class="fa-solid fa-user"></i></div>`;
-            document.getElementById('detalle-info-vendedor').innerHTML = `
-                <div class="flex items-center gap-3">
-                    ${avatarHtml}
-                    <div>
-                        <p class="font-bold text-gray-800">${anuncio.vendedor_nombre}</p>
-                        <p class="text-xs text-gray-500 font-bold uppercase"><i class="fa-solid fa-graduation-cap"></i> Vendedor verificado</p>
-                    </div>
-                </div>
-                <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 border border-blue-100">
-                    <i class="fa-solid fa-envelope"></i> ${anuncio.vendedor_email}
-                </div>
-            `;
-
-            const divFoto = document.getElementById('detalle-foto-principal');
-            const divMinis = document.getElementById('detalle-miniaturas');
-            divMinis.innerHTML = '';
-
+            document.getElementById('detalle-info-vendedor').innerHTML = `<div class="flex items-center gap-3">${avatarHtml}<div><p class="font-bold text-gray-800">${anuncio.vendedor_nombre}</p><p class="text-xs text-gray-500 font-bold uppercase"><i class="fa-solid fa-graduation-cap"></i> Vendedor verificado</p></div></div><div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 border border-blue-100"><i class="fa-solid fa-envelope"></i> ${anuncio.vendedor_email}</div>`;
+            const divFoto = document.getElementById('detalle-foto-principal'), divMinis = document.getElementById('detalle-miniaturas'); divMinis.innerHTML = '';
             if (anuncio.imagenes && anuncio.imagenes.length > 0) {
                 divFoto.innerHTML = `<img src="${anuncio.imagenes[0]}" class="w-full h-full object-contain">`;
-                if (anuncio.imagenes.length > 1) {
-                    anuncio.imagenes.forEach(img => { divMinis.innerHTML += `<img src="${img}" onclick="document.getElementById('detalle-foto-principal').querySelector('img').src='${img}'" class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600 transition shrink-0 shadow-sm">`; });
-                }
+                if (anuncio.imagenes.length > 1) { anuncio.imagenes.forEach(img => { divMinis.innerHTML += `<img src="${img}" onclick="document.getElementById('detalle-foto-principal').querySelector('img').src='${img}'" class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600 transition shrink-0 shadow-sm">`; }); }
             } else { divFoto.innerHTML = `<i class="fa-solid fa-image text-6xl text-gray-300"></i>`; }
-
-            const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario);
-            const esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
+            
+            const esMio = (usuarioActual && anuncio.id_usuario === usuarioActual.id_usuario), esAdmin = (usuarioActual && usuarioActual.rol === 'moderador');
             const zonaBoton = document.getElementById('detalle-zona-boton');
-
             if (anuncio.estado === 'vendido') {
                 zonaBoton.innerHTML = `<div class="bg-gray-100 text-gray-500 font-bold p-4 rounded-xl text-center"><i class="fa-solid fa-lock"></i> Vendido</div>`;
-                if (esAdmin) {
-                     zonaBoton.innerHTML += `
-                     <div class="mt-4 pt-4 border-t border-red-100">
-                        <p class="text-red-500 text-sm font-bold mb-2 text-center"><i class="fa-solid fa-shield-halved"></i> Modo Administrador</p>
-                        <button onclick="borrarAnuncio(${anuncio.id_anuncio})" class="w-full bg-red-50 border-2 border-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Eliminar Registro</button>
-                     </div>`;
-                }
+                if (esAdmin) zonaBoton.innerHTML += `<div class="mt-4 pt-4 border-t border-red-100"><p class="text-red-500 text-sm font-bold mb-2 text-center"><i class="fa-solid fa-shield-halved"></i> Modo Administrador</p><button onclick="confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="w-full bg-red-50 border-2 border-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Eliminar Registro</button></div>`;
             } else if (esMio || esAdmin) {
                 let badgeAdmin = (esAdmin && !esMio) ? `<p class="text-red-500 text-sm font-bold mb-3 text-center"><i class="fa-solid fa-shield-halved"></i> Modificando como Administrador</p>` : "";
-                zonaBoton.innerHTML = `
-                    ${badgeAdmin}
-                    <div class="flex gap-4">
-                        <button onclick="abrirEditor(${anuncio.id_anuncio})" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition"><i class="fa-solid fa-pen"></i> Editar</button>
-                        <button onclick="borrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 border-2 border-red-100 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Borrar</button>
-                    </div>
-                `;
+                zonaBoton.innerHTML = `${badgeAdmin}<div class="flex gap-4"><button onclick="abrirEditor(${anuncio.id_anuncio})" class="flex-1 bg-white border-2 border-blue-600 text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition"><i class="fa-solid fa-pen"></i> Editar</button><button onclick="confirmarBorrarAnuncio(${anuncio.id_anuncio})" class="flex-1 bg-red-50 border-2 border-red-100 text-red-600 font-bold py-4 rounded-xl hover:bg-red-100 transition"><i class="fa-solid fa-trash"></i> Borrar</button></div>`;
             } else {
-                // CAMBIO CLAVE: Llama al Checkout
                 zonaBoton.innerHTML = `<button onclick="iniciarCheckout(${anuncio.id_anuncio})" class="w-full bg-green-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg"><i class="fa-solid fa-cart-shopping"></i> Comprar Ahora</button>`;
             }
             cambiarPantalla('pantalla-detalle');
         }
 
-        // --- NUEVO: SISTEMA DE CHECKOUT REALISTA ---
-        function iniciarCheckout(idAnuncio) {
-            if (!usuarioActual) { 
-                alert("¡Para comprar necesitas iniciar sesión primero!"); 
-                cambiarPantalla('pantalla-login'); 
-                return; 
-            }
-            
-            articuloEnCheckout = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
-            if (!articuloEnCheckout) return;
-
-            // Rellenar datos visuales del resumen
-            document.getElementById('checkout-titulo').innerText = articuloEnCheckout.titulo;
-            document.getElementById('checkout-vendedor').innerText = `Vendido por: ${articuloEnCheckout.vendedor_nombre}`;
-            document.getElementById('checkout-subtotal').innerText = `€${articuloEnCheckout.precio.toFixed(2)}`;
-            
-            const total = articuloEnCheckout.precio + 0.99; // Precio + Seguro ficticio
-            document.getElementById('checkout-total').innerText = `€${total.toFixed(2)}`;
-
-            if (articuloEnCheckout.imagenes && articuloEnCheckout.imagenes.length > 0) {
-                document.getElementById('checkout-foto').innerHTML = `<img src="${articuloEnCheckout.imagenes[0]}" class="w-full h-full object-cover">`;
-            } else {
-                document.getElementById('checkout-foto').innerHTML = `<i class="fa-solid fa-box text-3xl text-gray-300"></i>`;
-            }
-
-            // Nombre automático en la tarjeta
-            document.getElementById('pago-nombre').value = usuarioActual.usuario;
-
-            cambiarPantalla('pantalla-checkout');
-        }
-
-        async function procesarPagoFinal() {
-            if (!articuloEnCheckout) return;
-            
-            const btnPagar = document.getElementById('btn-pagar');
-            const textoOriginal = btnPagar.innerHTML;
-            
-            // Efecto visual de carga
-            btnPagar.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Procesando pago...`;
-            btnPagar.disabled = true;
-
-            // Simulamos un retraso de 1.5 segundos de "conexión con el banco"
-            setTimeout(async () => {
-                try { 
-                    const res = await fetch(`${API_BASE}/comprar/${articuloEnCheckout.id_anuncio}?id_comprador=${usuarioActual.id_usuario}`, { method: 'PUT' });
-                    if (res.ok) { 
-                        alert("¡Pago aceptado! La compra se ha realizado con éxito."); 
-                        await cargarDatosCentrales(); 
-                        cambiarPestanaPerfil('comprados');
-                        cambiarPantalla('pantalla-perfil');
-                    }
-                } catch(e) { 
-                    alert("Error conectando con el servidor."); 
-                } finally {
-                    btnPagar.innerHTML = textoOriginal;
-                    btnPagar.disabled = false;
-                    articuloEnCheckout = null;
-                }
-            }, 1500);
-        }
-
-        // --- EDITAR Y BORRAR ---
         function abrirEditor(idAnuncio) {
-            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio);
-            if(!anuncio) return;
-            document.getElementById('edit-id').value = anuncio.id_anuncio;
-            document.getElementById('edit-titulo').value = anuncio.titulo;
-            document.getElementById('edit-desc').value = anuncio.descripcion;
-            document.getElementById('edit-precio').value = anuncio.precio;
-            document.getElementById('edit-cat').value = anuncio.categoria;
+            const anuncio = anunciosGlobales.find(a => a.id_anuncio === idAnuncio); if(!anuncio) return;
+            document.getElementById('edit-id').value = anuncio.id_anuncio; document.getElementById('edit-titulo').value = anuncio.titulo; document.getElementById('edit-desc').value = anuncio.descripcion; document.getElementById('edit-precio').value = anuncio.precio; document.getElementById('edit-cat').value = anuncio.categoria;
             cambiarPantalla('pantalla-editar');
         }
+
         async function guardarEdicionAnuncio() {
             const idAnuncio = document.getElementById('edit-id').value;
             const datos = { id_usuario: usuarioActual.id_usuario, titulo: document.getElementById('edit-titulo').value, descripcion: document.getElementById('edit-desc').value, precio: parseFloat(document.getElementById('edit-precio').value), categoria: document.getElementById('edit-cat').value };
-            try {
-                const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(datos) });
-                if(res.ok) { alert("¡Anuncio actualizado!"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); } else alert("Error: " + (await res.json()).detail);
-            } catch(e) {}
+            try { 
+                const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(datos) }); 
+                if(res.ok) { mostrarNotificacion("¡Anuncio actualizado!", "exito"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); } 
+                else mostrarNotificacion("Error: " + (await res.json()).detail, "error"); 
+            } catch(e) { mostrarNotificacion("Error al conectar", "error"); }
         }
-        async function borrarAnuncio(idAnuncio) {
-            if(!confirm("¿Borrar definitivamente?")) return;
-            try {
-                const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' });
-                if(res.ok) { alert("Borrado correctamente"); cargarDatosCentrales(); cambiarPantalla('pantalla-tienda'); }
-            } catch(e) {}
+
+        // SUSTITUIDO POR EL MODAL PERSONALIZADO
+        function confirmarBorrarAnuncio(idAnuncio) {
+            mostrarConfirmacion(
+                "Borrar Anuncio",
+                "¿Seguro que quieres borrar este anuncio definitivamente? Esta acción no se puede deshacer.",
+                "Sí, eliminar",
+                "bg-red-600 hover:bg-red-700",
+                async () => {
+                    try { 
+                        const res = await fetch(`${API_BASE}/anuncios/${idAnuncio}?id_usuario=${usuarioActual.id_usuario}`, { method: 'DELETE' }); 
+                        if(res.ok) { 
+                            mostrarNotificacion("Anuncio borrado correctamente", "info"); 
+                            cargarDatosCentrales(); 
+                            cambiarPantalla('pantalla-tienda'); 
+                        } else { mostrarNotificacion("Error al borrar", "error"); } 
+                    } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
+                }
+            );
         }
 
         async function toggleFavorito(idAnuncio) {
-            if (!usuarioActual) { alert("Inicia sesión para guardar favoritos."); cambiarPantalla('pantalla-login'); return; }
+            if (!usuarioActual) { mostrarNotificacion("Inicia sesión para guardar favoritos.", "error"); cambiarPantalla('pantalla-login'); return; }
             try { const res = await fetch(`${API_BASE}/favoritos`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id_usuario: usuarioActual.id_usuario, id_anuncio: idAnuncio }) }); if(res.ok) cargarDatosCentrales(); } catch(e) {}
         }
 
@@ -636,20 +644,61 @@
         function mostrarOcultarPass(inputId, iconoId) { const i = document.getElementById(inputId), ic = document.getElementById(iconoId); if(i.type==="password"){i.type="text"; ic.className="fa-regular fa-eye-slash";}else{i.type="password"; ic.className="fa-regular fa-eye";} }
         
         async function subirAnuncioReal() {
-            if (!usuarioActual) { alert("¡Inicia sesión para publicar!"); cambiarPantalla('pantalla-login'); return; }
+            if (!usuarioActual) { mostrarNotificacion("¡Inicia sesión para publicar!", "error"); cambiarPantalla('pantalla-login'); return; }
+            
+            const titulo = document.getElementById('nuevo-titulo').value;
+            const desc = document.getElementById('nuevo-desc').value;
+            const precio = document.getElementById('nuevo-precio').value;
+            
+            if(!titulo || !desc || !precio) {
+                mostrarNotificacion("Rellena todos los campos obligatorios.", "error");
+                return;
+            }
+
             const inputImagenes = document.getElementById('nuevo-imagenes'); const arrayFotos = [];
             for(let i=0; i<inputImagenes.files.length; i++) arrayFotos.push(await leerArchivoComoBase64(inputImagenes.files[i]));
-            const anuncio = { id_usuario: usuarioActual.id_usuario, titulo: document.getElementById('nuevo-titulo').value, descripcion: document.getElementById('nuevo-desc').value, precio: parseFloat(document.getElementById('nuevo-precio').value), categoria: document.getElementById('nuevo-cat').value, imagenes: arrayFotos };
-            try { const res = await fetch(`${API_BASE}/anuncios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(anuncio) }); if (res.ok) { alert("¡Anuncio publicado!"); cambiarPestanaPerfil('venta'); cambiarPantalla('pantalla-perfil'); } else alert("Moderación: " + (await res.json()).detail); } catch(e) {}
+            const anuncio = { id_usuario: usuarioActual.id_usuario, titulo: titulo, descripcion: desc, precio: parseFloat(precio), categoria: document.getElementById('nuevo-cat').value, imagenes: arrayFotos };
+            
+            try { 
+                const res = await fetch(`${API_BASE}/anuncios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(anuncio) }); 
+                if (res.ok) { 
+                    mostrarNotificacion("¡Anuncio publicado!", "exito"); 
+                    
+                    // Limpiar campos después de publicar
+                    document.getElementById('nuevo-titulo').value = '';
+                    document.getElementById('nuevo-desc').value = '';
+                    document.getElementById('nuevo-precio').value = '';
+                    document.getElementById('preview-imagenes').innerHTML = '';
+                    
+                    cambiarPestanaPerfil('venta'); 
+                    cambiarPantalla('pantalla-perfil'); 
+                } else { 
+                    mostrarNotificacion("Moderación: " + (await res.json()).detail, "error"); 
+                } 
+            } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
         }
 
         async function intentarLogin() {
-            try { const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('email-login').value, contrasena: document.getElementById('pass-login').value}) }); const data = await res.json(); if(res.ok) iniciarSesionUI(data); else alert("Error: " + data.detail); } catch(e) {}
+            try { 
+                const res = await fetch(`${API_BASE}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('email-login').value, contrasena: document.getElementById('pass-login').value}) }); 
+                const data = await res.json(); 
+                if(res.ok) {
+                    mostrarNotificacion(`¡Hola, ${data.usuario}!`, "exito");
+                    iniciarSesionUI(data); 
+                } else { mostrarNotificacion(data.detail, "error"); } 
+            } catch(e) { mostrarNotificacion("Error de conexión al servidor", "error"); }
         }
+
         async function intentarRegistro() {
-            const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; if(!nom || !em || !pa) return alert("Rellena todos los campos");
+            const nom = document.getElementById('reg-nombre').value, em = document.getElementById('reg-email').value, pa = document.getElementById('reg-pass').value; 
+            if(!nom || !em || !pa) { mostrarNotificacion("Rellena todos los campos.", "error"); return; }
             let foto = ""; if(document.getElementById('reg-foto').files.length > 0) foto = await leerArchivoComoBase64(document.getElementById('reg-foto').files[0]);
-            try { const res = await fetch(`${API_BASE}/registro`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre: nom, email: em, contrasena: pa, foto_perfil: foto}) }); const data = await res.json(); if(res.ok) { alert("¡Cuenta creada!"); iniciarSesionUI(data); } else alert("Error: " + data.detail); } catch(e) {}
+            try { 
+                const res = await fetch(`${API_BASE}/registro`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({nombre: nom, email: em, contrasena: pa, foto_perfil: foto}) }); 
+                const data = await res.json(); 
+                if(res.ok) { mostrarNotificacion("¡Cuenta creada con éxito!", "exito"); iniciarSesionUI(data); } 
+                else { mostrarNotificacion(data.detail, "error"); } 
+            } catch(e) { mostrarNotificacion("Error de conexión", "error"); }
         }
 
         function iniciarSesionUI(data) {
@@ -659,7 +708,25 @@
             document.getElementById('nav-foto-perfil').innerHTML = av; document.getElementById('perfil-foto-grande').innerHTML = data.foto_perfil ? `<img src="${data.foto_perfil}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user"></i>`;
             cambiarPantalla('pantalla-tienda');
         }
-        function cerrarSesion() { if(confirm("¿Cerrar sesión?")) { usuarioActual = null; misFavoritos = []; document.getElementById('contenedor-perfil').classList.add('hidden'); document.getElementById('contenedor-perfil').classList.remove('flex'); document.getElementById('btn-login').classList.remove('hidden'); cambiarPantalla('pantalla-tienda'); } }
+
+        // SUSTITUIDO POR EL MODAL PERSONALIZADO
+        function confirmarCerrarSesion() { 
+            mostrarConfirmacion(
+                "Cerrar Sesión", 
+                "¿Seguro que quieres cerrar la sesión en este dispositivo?",
+                "Cerrar Sesión",
+                "bg-red-600 hover:bg-red-700",
+                () => {
+                    usuarioActual = null; 
+                    misFavoritos = []; 
+                    document.getElementById('contenedor-perfil').classList.add('hidden'); 
+                    document.getElementById('contenedor-perfil').classList.remove('flex'); 
+                    document.getElementById('btn-login').classList.remove('hidden'); 
+                    mostrarNotificacion("Sesión cerrada.", "info");
+                    cambiarPantalla('pantalla-tienda'); 
+                }
+            );
+        }
     </script>
 </body>
 </html>
